@@ -1,19 +1,20 @@
 import SwiftUI
 import Network
 import Security
+import StoreKit
 
 struct Session: Codable { let base: URL; let token: String; let userID: Int }
-struct Evening: Identifiable { let id: String; let name: String; let mode: String; let matches: [Match] }
-struct Match: Identifiable { let id: String; let a: String; let b: String; let score: String; let status: String }
 @MainActor final class AppModel: ObservableObject {
     @Published var favorites: [FavoritePlayer] = []
     @Published var games: [LocalGame] = []
     @Published var account: Account?
     @Published var selectedTeam: Int = 0
     @Published var evenings: [Evening] = []
+    @Published var teamPlayers: [PlatformPlayer] = []
     @Published var online = true
     @Published var syncing = false
     @Published var issue: String?
+    @Published var loginIssue: String?
     @Published var fatalStorage = false
     @Published var loggedIn = false
     @Published var quick = (UserDefaults.standard.object(forKey:"quick") as? Bool) ?? true
@@ -22,6 +23,7 @@ struct Match: Identifiable { let id: String; let a: String; let b: String; let s
     private let monitor = NWPathMonitor()
     private var retryAfter = Date.distantPast
     private var failures = 0
+    private var platformRequestRunning = false
     private var deviceID = ""
     private var deviceSecret = ""
     init() {
@@ -51,9 +53,40 @@ struct Match: Identifiable { let id: String; let a: String; let b: String; let s
             favorites = try database.favorites()
         } catch { issue = "storage_error" }
     }
+    func moveFavorites(from offsets: IndexSet, to destination: Int) {
+        guard let database else { return }
+        var reordered = favorites
+        reordered.move(fromOffsets:offsets,toOffset:destination)
+        do { try database.reorderFavorites(reordered.map(\.id)); favorites = reordered }
+        catch { issue = "storage_error" }
+    }
+    func removeFavorite(_ id: String) {
+        guard let database else { return }
+        do { try database.removeFavorite(id); favorites = try database.favorites() }
+        catch { issue = "storage_error" }
+    }
     func save(_ game: LocalGame) throws {
         guard let database, !fatalStorage else { throw GameError.database }
         try database.save(game); games = try database.load()
+    }
+    @discardableResult func changeStarter(_ id: String, to side: Int) -> Bool {
+        guard var game = games.first(where:{$0.id == id}), game.canChangeStarter else { return false }
+        do { try game.changeStarter(to:side); try save(game); return true }
+        catch { issue = "storage_error"; return false }
+    }
+    func archiveGame(_ id: String, archived: Bool) {
+        guard var game = games.first(where:{$0.id == id}) else { return }
+        game.archived = archived
+        do { try save(game) } catch { issue = "storage_error" }
+    }
+    @discardableResult func deleteGame(_ id: String) -> Bool {
+        guard !syncing else { issue = "delete_wait_sync"; return false }
+        guard let database, !fatalStorage else { issue = "storage_error"; return false }
+        do {
+            try database.deleteGame(id)
+            games.removeAll { $0.id == id }
+            return true
+        } catch { issue = "storage_error"; return false }
     }
     func create(_ config: GameConfig) -> String? {
         let game = LocalGame(config:config)
@@ -72,23 +105,93 @@ struct Match: Identifiable { let id: String; let a: String; let b: String; let s
         g.uploadRequested = true; g.teamID = selectedTeam; g.userID = session.userID; g.serverOrigin = session.base.absoluteString
         do { try save(g); Task { await refresh() } } catch { issue = "storage_error" }
     }
-    func login(base: String, login: String, password: String) async {
-        guard let url = URL(string:base), url.host != nil, url.user == nil, url.password == nil, url.query == nil, url.fragment == nil, url.path.isEmpty || url.path == "/" else { issue = "connection_error"; return }
+    func register(name: String, email: String, password: String, confirmation: String, teamName: String) async throws {
+        let url = URL(string:"https://www.yourdartclub.com")!
+        let body = try JSONSerialization.data(withJSONObject:["name":name,"email":email,"password":password,"password_confirmation":confirmation,"teamName":teamName,"terms":true,"locale":AppLanguage.code])
+        _ = try await MobileAPI(base:url,token:nil).request("register",body:body)
+    }
+    func login(base: String, login: String, password: String) async -> Bool {
+        loginIssue = nil
+        guard let url = URL(string:base), url.host != nil, url.user == nil, url.password == nil, url.query == nil, url.fragment == nil, url.path.isEmpty || url.path == "/" else { loginIssue = "login_connection_error"; return false }
         do {
-            let body = try JSONSerialization.data(withJSONObject:["login":login,"password":password,"deviceId":deviceID,"deviceSecret":deviceSecret])
+            let body = try JSONSerialization.data(withJSONObject:["login":login.trimmingCharacters(in:.whitespacesAndNewlines),"password":password,"deviceId":deviceID,"deviceSecret":deviceSecret])
             let data = try await MobileAPI(base:url,token:nil).request("login",body:body)
             struct Reply: Decodable { let token: String; let userId: Int }
             let reply = try JSONDecoder().decode(Reply.self,from:data)
             let newSession = Session(base:url,token:reply.token,userID:reply.userId)
             try Vault.write("session",JSONEncoder().encode(newSession)); session = newSession; loggedIn = true; issue = nil
             await refresh(force:true)
-        } catch { explain(error) }
+            return true
+        } catch {
+            switch (error as? APIError)?.status {
+            case 401: loginIssue = "login_invalid"
+            case 404,405: loginIssue = "login_backend_missing"
+            case 429: loginIssue = "login_rate_limit"
+            case 400,422: loginIssue = "login_check_fields"
+            case 409: loginIssue = "login_device_conflict"
+            default: loginIssue = "login_connection_error"
+            }
+            return false
+        }
     }
+    func platformDestination(event: String? = nil, create: Bool = false, tv: Bool = false) -> PlatformDestination? {
+        guard online, let session, account?.teams.contains(where:{$0.id == selectedTeam && $0.active}) == true else {
+            issue = online ? "login_required" : "platform_online_required"; return nil
+        }
+        var request = URLRequest(url:session.base.appendingPathComponent("mobile/team"))
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(session.token)",forHTTPHeaderField:"Authorization")
+        request.setValue(String(selectedTeam),forHTTPHeaderField:"X-Team-Id")
+        request.setValue("application/json",forHTTPHeaderField:"Content-Type")
+        request.setValue("text/html",forHTTPHeaderField:"Accept")
+        var body: [String:Any] = ["locale":AppLanguage.code,"create":create,"destination":tv ? "tv" : "team"]
+        if let event { body["event"] = event }
+        request.httpBody = try? JSONSerialization.data(withJSONObject:body)
+        return PlatformDestination(request:request,team:selectedTeam)
+    }
+    func platformRequest(_ path: String, body: [String:Any]? = nil, team: Int) async throws -> Data {
+        while platformRequestRunning { try await Task.sleep(for:.milliseconds(50)) }
+        try Task.checkCancellation()
+        guard online, let current = session, selectedTeam == team else { throw APIError(status:0) }
+        platformRequestRunning = true; defer { platformRequestRunning = false }
+        let data = try await MobileAPI(base:current.base,token:current.token,team:team).request(path,body:body.map { try JSONSerialization.data(withJSONObject:$0) })
+        guard session?.token == current.token, selectedTeam == team else { throw CancellationError() }
+        return data
+    }
+    @discardableResult func platformUpdate(_ body: [String:Any]? = nil, team: Int) async throws -> PlatformSnapshot {
+        let snapshot = try JSONDecoder().decode(PlatformSnapshot.self,from:await platformRequest("club",body:body,team:team))
+        evenings = snapshot.evenings; teamPlayers = snapshot.players
+        return snapshot
+    }
+    func accountRequest(_ path: String, body: [String:Any]? = nil, team: Int? = nil) async throws -> Data {
+        guard online, let current = session else { throw APIError(status:0) }
+        let data = try await MobileAPI(base:current.base,token:current.token,team:team).request(path,body:body.map { try JSONSerialization.data(withJSONObject:$0) })
+        guard session?.token == current.token else { throw CancellationError() }
+        return data
+    }
+    func confirmPurchase(_ result: VerificationResult<StoreKit.Transaction>, team: Int) async throws {
+        guard case .verified(let transaction) = result else { throw APIError(status:422) }
+        struct Reply: Decodable { let verified: Bool }
+        let reply = try JSONDecoder().decode(Reply.self,from:await accountRequest("subscription/verify",body:["signedTransaction":result.jwsRepresentation],team:team))
+        guard reply.verified else { throw APIError(status:422) }
+        await transaction.finish()
+        await refresh(force:true)
+    }
+    func recoverPurchase(_ result: VerificationResult<StoreKit.Transaction>) async {
+        guard case .verified(let transaction) = result, let token = transaction.appAccountToken else { return }
+        for team in account?.teams.filter({$0.owner}) ?? [] {
+            do {
+                let options = try JSONDecoder().decode(SubscriptionOptions.self,from:await accountRequest("subscription",team:team.id))
+                if options.token == token { try await confirmPurchase(result,team:team.id); return }
+            } catch { /* Keep transaction unfinished so recovery can retry. */ }
+        }
+    }
+    func playerName(_ id: String?) -> String { teamPlayers.first { $0.id == id }?.name ?? "—" }
     func logout() async {
         guard let current = session else { return }
         // Retain every local game and queued event, even if revocation cannot reach the server.
         do { try Vault.delete("session") } catch { issue = "storage_error"; return }
-        session = nil; loggedIn = false; account = nil; evenings = []; selectedTeam = 0
+        session = nil; loggedIn = false; account = nil; evenings = []; teamPlayers = []; selectedTeam = 0
         _ = try? await MobileAPI(base:current.base,token:current.token).request("logout",body:Data("{\"revoke\":true}".utf8))
     }
     func refresh(force: Bool = false) async {
@@ -99,6 +202,7 @@ struct Match: Identifiable { let id: String; let a: String; let b: String; let s
             let me = try JSONDecoder().decode(Account.self,from: await api.request("me"))
             guard session?.token == current.token else { return }
             if account == nil && !UserDefaults.standard.bool(forKey:"quickCustomized") { quick = me.quickScoreAutoSubmit; UserDefaults.standard.set(quick,forKey:"quick") }; account = me
+            for await result in Transaction.unfinished { await recoverPurchase(result) }
             if !me.teams.contains(where:{$0.id == selectedTeam}) { selectedTeam = me.teams.first?.id ?? 0 }
             for original in games where original.uploadRequested && original.userID == current.userID && original.serverOrigin == current.base.absoluteString && original.syncProblem == nil {
                 guard let teamID = original.teamID, me.teams.contains(where:{$0.id == teamID && $0.active}) else { continue }
@@ -123,15 +227,7 @@ struct Match: Identifiable { let id: String; let a: String; let b: String; let s
             }
             if me.teams.contains(where:{$0.id == selectedTeam && $0.active}) {
                 let teamID = selectedTeam
-                let data = try await MobileAPI(base:current.base,token:current.token,team:teamID).request("club")
-                guard session?.token == current.token, selectedTeam == teamID else { return }
-                let raw = try JSONSerialization.jsonObject(with:data) as? [String:Any] ?? [:]
-                let players = (raw["players"] as? [[String:Any]] ?? []).reduce(into:[String:String]()) { map,p in if let id = p["id"] as? String { map[id] = p["name"] as? String } }
-                evenings = (raw["evenings"] as? [[String:Any]] ?? []).map { e in
-                    Evening(id:e["id"] as? String ?? "", name:e["name"] as? String ?? "",mode:e["mode"] as? String ?? "",matches:(e["matches"] as? [[String:Any]] ?? []).map { m in
-                        Match(id:m["id"] as? String ?? "",a:players[m["a"] as? String ?? ""] ?? "…",b:players[m["b"] as? String ?? ""] ?? "…",score:"\(m["scoreA"] as? Int ?? 0) – \(m["scoreB"] as? Int ?? 0)",status:m["status"] as? String ?? "")
-                    })
-                }
+                try await platformUpdate(team:teamID)
             } else { evenings = [] }
             issue = nil; failures = 0; retryAfter = .distantPast
         } catch { failures += 1; retryAfter = Date().addingTimeInterval(min(300,15 * pow(2,Double(min(failures - 1,5))))); explain(error) }

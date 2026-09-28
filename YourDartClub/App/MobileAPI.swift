@@ -1,8 +1,8 @@
 import Foundation
 import Security
 
-struct Team: Codable, Identifiable { let id: Int; let name: String; let owner: Bool; let active: Bool; let paidUntil: String? }
-struct Account: Codable { let userId: Int; let quickScoreAutoSubmit: Bool; let teams: [Team] }
+struct Team: Codable, Identifiable { let id: Int; let name: String; let owner: Bool; let active: Bool; let paidUntil: String?; let playerLimit: Int? }
+struct Account: Codable { let userId: Int; let quickScoreAutoSubmit: Bool; let teams: [Team]; let canCreateTeam: Bool? }
 struct APIError: Error { let status: Int }
 struct MobileAPI {
     let base: URL

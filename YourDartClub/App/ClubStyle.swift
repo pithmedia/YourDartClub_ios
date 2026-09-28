@@ -2,9 +2,16 @@ import SwiftUI
 
 // Shared visual tokens from resources/css/app.css and the official logo.
 enum ClubStyle {
+    // Website body uses Arial; 750–850 weight resolves to its bold face.
+    static func numberFont(_ size: CGFloat, relativeTo style: Font.TextStyle = .body) -> Font {
+        .custom("Arial-BoldMT",size:size,relativeTo:style)
+    }
+    static func fittedScoreFont(_ size: CGFloat) -> Font { .custom("Arial-BoldMT",fixedSize:size) }
     static let background = Color(hex:0x0e1411)
     static let card = Color(hex:0x151d18)
     static let elevated = Color(hex:0x202c23)
+    static let danger = Color(hex:0xc64045)
+    static let archive = Color(hex:0xa96023)
     static let lime = Color(hex:0xbbf77a)
     static let text = Color(hex:0xf2f5ef)
     static let muted = Color(hex:0xa4afa5)
@@ -21,6 +28,7 @@ extension View {
     }
     func clubScreen() -> some View {
         self.scrollContentBackground(.hidden).background(ClubStyle.background)
+            .contentMargins(.top,8,for:.scrollContent)
             .toolbarBackground(ClubStyle.background,for:.navigationBar).toolbarBackground(.visible,for:.navigationBar)
     }
 }
@@ -75,4 +83,4 @@ struct LogoIntro: View {
         }
     }
 }
-func textFormat(_ key: String, _ args: CVarArg...) -> String { String(format:tr(key),locale:Locale.current,arguments:args) }
+func textFormat(_ key: String, _ args: CVarArg...) -> String { String(format:tr(key),locale:AppLanguage.locale,arguments:args) }

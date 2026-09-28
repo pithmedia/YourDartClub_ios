@@ -37,9 +37,15 @@ public struct LocalGame: Codable, Identifiable, Sendable {
     public var serverOrigin: String?
     public var serverConfirmed: Bool?
     public var syncProblem: String?
+    public var archived: Bool?
     public var createdAt = Date()
     public init(config: GameConfig) { self.config = config }
     public var pending: Int { events.count - acknowledged }
+    public var canChangeStarter: Bool { events.isEmpty && !uploadRequested && acknowledged == 0 && serverConfirmed != true && archived != true && config.players.count > 1 }
+    public mutating func changeStarter(to side: Int) throws {
+        guard canChangeStarter, config.players.indices.contains(side), side < 4 else { throw GameError.invalidVisit }
+        config.starter = ["A","B","C","D"][side]
+    }
 }
 public struct ScoreState: Equatable, Sendable {
     public var remaining: [Int]
@@ -50,6 +56,7 @@ public struct ScoreState: Equatable, Sendable {
     public var turn: Int
     public var winner: Int?
     public var lastBust = false
+    public var recent: [[Int?]] = []
 }
 public enum DartRules {
     static let hits: [(String, Int)] = {
@@ -175,10 +182,11 @@ public enum DartRules {
     }
     public static func replay(_ game: LocalGame) throws -> ScoreState {
         let c = game.config
-        guard (2...4).contains(c.players.count), c.players.allSatisfy({ !$0.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && $0.count <= 60 }), [301,501,701].contains(c.game), [1,3,5,7,9,11].contains(c.bestOf), ["single","double"].contains(c.checkout), Array(["A","B","C","D"].prefix(c.players.count)).contains(c.starter) else { throw GameError.corruptHistory }
+        guard (1...4).contains(c.players.count), c.players.allSatisfy({ !$0.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && $0.count <= 60 }), [301,501,701].contains(c.game), [1,3,5,7,9,11].contains(c.bestOf), ["single","double"].contains(c.checkout), Array(["A","B","C","D"].prefix(c.players.count)).contains(c.starter) else { throw GameError.corruptHistory }
         let count = c.players.count
         let start = ["A","B","C","D"].firstIndex(of:c.starter)!
         var s = ScoreState(remaining:Array(repeating:c.game,count:count),legs:Array(repeating:0,count:count),points:Array(repeating:0,count:count),dartsThrown:Array(repeating:0,count:count),maximums:Array(repeating:0,count:count),turn:start)
+        s.recent = Array(repeating:[],count:count)
         for v in try activeVisits(game.events) {
             guard s.winner == nil else { throw GameError.finished }
             guard possible(v.score, darts: v.darts), (1...3).contains(v.darts) else { throw GameError.invalidVisit }
@@ -186,6 +194,8 @@ public enum DartRules {
             if v.finish && (v.bust || rest != 0 || !checkout(before, mode: c.checkout, darts: v.darts)) { throw GameError.invalidCheckout }
             let bust = v.bust || rest < 0 || (c.checkout == "double" && rest == 1) || (rest == 0 && !v.finish)
             s.lastBust = bust
+            s.recent[side].insert(bust ? nil : v.score,at:0)
+            s.recent[side] = Array(s.recent[side].prefix(3))
             s.dartsThrown[side] += v.darts
             s.points[side] += bust ? 0 : v.score
             if !bust && v.score == 180 { s.maximums[side] += 1 }
@@ -193,7 +203,7 @@ public enum DartRules {
             if !bust && rest == 0 && v.finish {
                 s.legs[side] += 1
                 if s.legs[side] >= (c.bestOf + 1) / 2 { s.winner = side }
-                else { s.remaining = Array(repeating:c.game,count:count); s.turn = (start + s.legs.reduce(0,+)) % count }
+                else { s.recent = Array(repeating:[],count:count); s.remaining = Array(repeating:c.game,count:count); s.turn = (start + s.legs.reduce(0,+)) % count }
             } else { s.turn = (side + 1) % count }
         }
         return s

@@ -33,3 +33,23 @@ public struct FavoritePlayer: Codable, Identifiable, Equatable {
     public static func clean(_ name: String) -> String { name.split(whereSeparator:{$0.isWhitespace}).joined(separator:" ") }
     public static func key(_ name: String) -> String { clean(name).lowercased() }
 }
+
+public struct CheckoutSuggestion: Equatable, Sendable {
+    public let targets: [String]
+    public let nextVisit: Bool
+    public static func make(remaining: Int, checkout: String, dartsLeft: Int) -> Self? {
+        if let route = DartRules.advice(remaining,mode:checkout,darts:dartsLeft) {
+            return Self(targets:route.components(separatedBy:" · "),nextVisit:false)
+        }
+        guard let route = DartRules.advice(remaining,mode:checkout,darts:3) else { return nil }
+        return Self(targets:route.components(separatedBy:" · "),nextVisit:true)
+    }
+}
+public enum InputBackAction: Equatable {
+    case clearInput, undoVisit(String), none
+    public static func resolve(input: String, events: [ScoreEvent]) throws -> Self {
+        if !input.isEmpty { return .clearInput }
+        guard let visit = try DartRules.activeVisits(events).last else { return .none }
+        return .undoVisit(visit.id)
+    }
+}

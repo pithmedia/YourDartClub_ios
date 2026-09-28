@@ -14,7 +14,7 @@ public final class GameDatabase {
             guard sqlite3_prepare_v2(db,"PRAGMA user_version",-1,&statement,nil) == SQLITE_OK else { throw GameError.database }
             let version = sqlite3_step(statement) == SQLITE_ROW ? sqlite3_column_int(statement,0) : -1
             sqlite3_finalize(statement)
-            guard (0...2).contains(version) else { throw GameError.database }
+            guard (0...3).contains(version) else { throw GameError.database }
             if version == 0 {
                 try execute("BEGIN IMMEDIATE")
                 do { try execute("CREATE TABLE games (id TEXT PRIMARY KEY, payload BLOB NOT NULL)"); try execute("PRAGMA user_version=1"); try execute("COMMIT") }
@@ -25,6 +25,15 @@ public final class GameDatabase {
                 do {
                     try execute("CREATE TABLE favorites (id TEXT PRIMARY KEY, name TEXT NOT NULL, normalized_name TEXT NOT NULL UNIQUE)")
                     try execute("PRAGMA user_version=2"); try execute("COMMIT")
+                } catch { try? execute("ROLLBACK"); throw error }
+            }
+            if version < 3 {
+                try execute("BEGIN IMMEDIATE")
+                do {
+                    try execute("ALTER TABLE favorites ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0")
+                    // Preserve the alphabetical order existing installations already displayed.
+                    try execute("UPDATE favorites SET sort_order=(SELECT COUNT(*) FROM favorites AS earlier WHERE earlier.normalized_name < favorites.normalized_name)")
+                    try execute("PRAGMA user_version=3"); try execute("COMMIT")
                 } catch { try? execute("ROLLBACK"); throw error }
             }
         } catch { sqlite3_close(db); db = nil; throw error }
@@ -41,6 +50,13 @@ public final class GameDatabase {
         guard sqlite3_bind_text(stmt,1,game.id,-1,transient) == SQLITE_OK else { throw GameError.database }
         let result = bytes.withUnsafeBytes { sqlite3_bind_blob(stmt,2,$0.baseAddress,Int32($0.count),transient) }
         guard result == SQLITE_OK, sqlite3_step(stmt) == SQLITE_DONE else { throw GameError.database }
+    }
+    public func deleteGame(_ id: String) throws {
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db,"DELETE FROM games WHERE id=?",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
+        defer { sqlite3_finalize(stmt) }
+        guard sqlite3_bind_text(stmt,1,id,-1,unsafeBitCast(-1,to:sqlite3_destructor_type.self)) == SQLITE_OK,
+              sqlite3_step(stmt) == SQLITE_DONE else { throw GameError.database }
     }
     public func load() throws -> [LocalGame] {
         var stmt: OpaquePointer?
@@ -60,7 +76,7 @@ public final class GameDatabase {
         let clean = FavoritePlayer.clean(name)
         guard !clean.isEmpty, clean.count <= 60 else { throw GameError.corruptHistory }
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db,"INSERT OR IGNORE INTO favorites(id,name,normalized_name) VALUES(?,?,?)",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
+        guard sqlite3_prepare_v2(db,"INSERT OR IGNORE INTO favorites(id,name,normalized_name,sort_order) VALUES(?,?,?,(SELECT COALESCE(MAX(sort_order),-1)+1 FROM favorites))",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
         defer { sqlite3_finalize(stmt) }
         let transient = unsafeBitCast(-1,to:sqlite3_destructor_type.self)
         for (index,value) in [UUID().uuidString,clean,FavoritePlayer.key(clean)].enumerated() {
@@ -74,9 +90,26 @@ public final class GameDatabase {
         defer { sqlite3_finalize(stmt) }
         guard sqlite3_bind_text(stmt,1,id,-1,unsafeBitCast(-1,to:sqlite3_destructor_type.self)) == SQLITE_OK, sqlite3_step(stmt) == SQLITE_DONE else { throw GameError.database }
     }
+    public func reorderFavorites(_ ids: [String]) throws {
+        try execute("BEGIN IMMEDIATE")
+        do {
+            let current = try favorites().map(\.id)
+            guard ids.count == current.count, Set(ids).count == ids.count, Set(ids) == Set(current) else { throw GameError.corruptHistory }
+            var stmt: OpaquePointer?
+            guard sqlite3_prepare_v2(db,"UPDATE favorites SET sort_order=? WHERE id=?",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
+            defer { sqlite3_finalize(stmt) }
+            for (position,id) in ids.enumerated() {
+                sqlite3_reset(stmt); sqlite3_clear_bindings(stmt)
+                guard sqlite3_bind_int64(stmt,1,Int64(position)) == SQLITE_OK,
+                      sqlite3_bind_text(stmt,2,id,-1,unsafeBitCast(-1,to:sqlite3_destructor_type.self)) == SQLITE_OK,
+                      sqlite3_step(stmt) == SQLITE_DONE else { throw GameError.database }
+            }
+            try execute("COMMIT")
+        } catch { try? execute("ROLLBACK"); throw error }
+    }
     public func favorites() throws -> [FavoritePlayer] {
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db,"SELECT id,name FROM favorites ORDER BY normalized_name",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
+        guard sqlite3_prepare_v2(db,"SELECT id,name FROM favorites ORDER BY sort_order,normalized_name",-1,&stmt,nil) == SQLITE_OK else { throw GameError.database }
         defer { sqlite3_finalize(stmt) }
         var result: [FavoritePlayer] = []
         while true {
