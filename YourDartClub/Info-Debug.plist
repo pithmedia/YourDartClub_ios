@@ -18,6 +18,8 @@
 	<string>1</string>
 	<key>GoogleCastReceiverID</key>
 	<string></string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

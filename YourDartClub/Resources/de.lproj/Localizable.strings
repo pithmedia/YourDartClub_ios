@@ -338,3 +338,7 @@
 "winner" = "Gewonnen!";
 "winner_name" = "%@ gewinnt!";
 "your_turn" = "Am Wurf";
+
+"subscription_store_intent" = "Melde dich an und öffne Abonnement für dein Team, um deinen App Store-Kauf fortzusetzen. Erstelle zuerst ein Team, falls du noch keines hast.";
+
+"subscription_store_selected" = "Im App Store ausgewählt";

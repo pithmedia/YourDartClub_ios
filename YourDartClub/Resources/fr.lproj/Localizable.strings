@@ -338,3 +338,7 @@
 "winner" = "Victoire !";
 "winner_name" = "%@ gagne !";
 "your_turn" = "À vous de jouer";
+
+"subscription_store_intent" = "Connectez-vous et ouvrez Abonnement pour votre équipe afin de poursuivre votre achat App Store. Créez une équipe si vous n’en avez pas.";
+
+"subscription_store_selected" = "Sélectionné dans l’App Store";

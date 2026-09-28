@@ -338,3 +338,7 @@
 "winner" = "Winner!";
 "winner_name" = "%@ wins!";
 "your_turn" = "Your turn";
+
+"subscription_store_intent" = "Sign in and open Subscription for your team to continue your App Store purchase. Create a team first if you do not have one.";
+
+"subscription_store_selected" = "Selected in the App Store";

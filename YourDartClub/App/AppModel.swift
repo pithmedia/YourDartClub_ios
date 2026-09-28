@@ -15,6 +15,7 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
     @Published var syncing = false
     @Published var issue: String?
     @Published var loginIssue: String?
+    @Published var pendingStoreProduct: Product?
     @Published var fatalStorage = false
     @Published var loggedIn = false
     @Published var quick = (UserDefaults.standard.object(forKey:"quick") as? Bool) ?? true

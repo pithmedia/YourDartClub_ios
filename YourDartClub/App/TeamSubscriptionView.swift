@@ -63,6 +63,9 @@ struct TeamSubscriptionView: View {
                                 VStack(alignment:.leading,spacing:6) {
                                     Text(LocalizedStringKey(options.products.first { $0.id == product.id }?.period == "yearly" ? "subscription_yearly" : "subscription_monthly")).font(.headline)
                                     Text(product.displayPrice).font(ClubStyle.numberFont(26))
+                                    if model.pendingStoreProduct?.id == product.id {
+                                        Text("subscription_store_selected").font(.caption)
+                                    }
                                 }.frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,6)
                             }.buttonStyle(ClubButton(primary:true)).disabled(busy)
                         }
@@ -102,6 +105,7 @@ struct TeamSubscriptionView: View {
             switch try await product.purchase(options:[.appAccountToken(token)]) {
             case .success(let result):
                 try await model.confirmPurchase(result,team:team.id)
+                model.pendingStoreProduct = nil
                 message = "subscription_confirmed"; await load()
             case .pending: message = "subscription_pending"
             case .userCancelled: break

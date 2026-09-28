@@ -338,3 +338,7 @@
 "winner" = "Gewonnen!";
 "winner_name" = "%@ wint!";
 "your_turn" = "Aan de beurt";
+
+"subscription_store_intent" = "Log in en kies bij je team Abonnement om je App Store-aankoop voort te zetten. Maak eerst een team aan als je er nog geen hebt.";
+
+"subscription_store_selected" = "Gekozen in de App Store";

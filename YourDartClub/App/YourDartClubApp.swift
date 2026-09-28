@@ -18,12 +18,13 @@ struct RootView: View {
     @Environment(\.locale) private var locale
     @EnvironmentObject var model: AppModel
     @State private var showIntro = true
+    @State private var selectedTab = 0
     var body: some View {
-        TabView {
-            GamesView().tabItem { Label("play",systemImage:"target") }
-            FavoritesView().tabItem { Label("favorites",systemImage:"star") }
-            TeamView().tabItem { Label("team",systemImage:"person.3") }
-            AccountView().tabItem { Label("account",systemImage:"person.crop.circle") }
+        TabView(selection:$selectedTab) {
+            GamesView().tabItem { Label("play",systemImage:"target") }.tag(0)
+            FavoritesView().tabItem { Label("favorites",systemImage:"star") }.tag(1)
+            TeamView().tabItem { Label("team",systemImage:"person.3") }.tag(2)
+            AccountView().tabItem { Label("account",systemImage:"person.crop.circle") }.tag(3)
         }
         .background { AirPlayVideoPreview().frame(width:1,height:1).opacity(0.01).allowsHitTesting(false).accessibilityHidden(true) }
         .toolbarBackground(ClubStyle.background,for:.tabBar)
@@ -34,6 +35,16 @@ struct RootView: View {
             }
         }
         .task { for await result in Transaction.updates { await model.recoverPurchase(result) } }
+        .task {
+            for await intent in PurchaseIntent.intents {
+                guard intent.product.type == .autoRenewable else { continue }
+                // Never buy before authentication and an explicit team selection.
+                // TeamSubscriptionView reloads the server's allowed products and token.
+                model.pendingStoreProduct = intent.product
+                showIntro = false
+                selectedTab = 3
+            }
+        }
         .task {
             #if DEBUG && targetEnvironment(simulator)
             if ProcessInfo.processInfo.arguments.contains("--airplay-picker-test") { AirPlayBoardStream.shared.runPickerSelfTest() }
@@ -169,6 +180,13 @@ struct AccountView: View {
         NavigationStack {
             Form {
                 Section("language") { LanguagePicker() }
+                if let product = model.pendingStoreProduct {
+                    Section {
+                        Text(product.displayName).font(.headline)
+                        Text("subscription_store_intent").font(.footnote).foregroundStyle(ClubStyle.muted)
+                        Button("cancel") { model.pendingStoreProduct = nil }
+                    }.listRowBackground(ClubStyle.card)
+                }
                 if model.loggedIn {
                     Section("team") { ForEach(model.account?.teams ?? []) { team in VStack(alignment:.leading) { Text(team.name).font(.headline); Text(team.active ? "access_active" : "access_required").font(.caption); if team.owner { NavigationLink { TeamSubscriptionView(team:team) } label: { Label("subscription",systemImage:"creditcard") } } } } }
                     if model.account?.canCreateTeam == true {
