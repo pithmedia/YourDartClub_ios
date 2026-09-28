@@ -257,6 +257,7 @@
 "subscription_choose_year" = "Choisir l’offre annuelle";
 "subscription_confirmed" = "Achat vérifié. Le statut de l’équipe a été mis à jour.";
 "subscription_currency_notice" = "Apple renvoie actuellement des prix dans une autre devise que l’euro. Vérifiez la région de votre App Store ; le prix affiché dans la fenêtre d’achat Apple fait foi.";
+"subscription_european_reference" = "Tarifs européens pour ce test : 10 € par mois ou 100 € par an. Apple confirme le prix de votre région App Store dans la fenêtre d’achat.";
 "subscription_events" = "Soirées et tournois illimités";
 "subscription_existing" = "Cette équipe possède déjà un abonnement. Ne souscrivez pas un second abonnement.";
 "subscription_failed" = "Chargement impossible. Vérifiez votre connexion et réessayez.";

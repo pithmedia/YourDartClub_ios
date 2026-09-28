@@ -66,8 +66,8 @@ struct TeamSubscriptionView: View {
                     else {
                         ForEach(products) { product in priceCard(product) }
                         if products.isEmpty { Text("subscription_unavailable") }
-                        if products.contains(where: { $0.priceFormatStyle.currencyCode != "EUR" }) {
-                            Text("subscription_currency_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+                        if products.contains(where: { display($0).usesEuropeanReference }) {
+                            Text("subscription_european_reference").font(.footnote).foregroundStyle(ClubStyle.muted)
                         }
                     }
                 } else { ProgressView().frame(maxWidth:.infinity) }
@@ -98,11 +98,13 @@ struct TeamSubscriptionView: View {
     private func priceCard(_ product: Product) -> some View {
         let yearly = options?.products.first { $0.id == product.id }?.period == "yearly"
         let monthly = products.first { item in options?.products.first { $0.id == item.id }?.period == "monthly" }
-        let saving: Decimal? = yearly && monthly?.priceFormatStyle.currencyCode == product.priceFormatStyle.currencyCode
-            ? monthly.map { $0.price * 12 - product.price } : nil
+        let price = display(product)
+        let monthlyPrice = monthly.map { display($0) }
+        let saving: Decimal? = yearly && monthlyPrice?.currency == price.currency
+            ? monthlyPrice.map { $0.amount * 12 - price.amount } : nil
         return VStack(alignment:.leading,spacing:16) {
             if let saving, saving > 0 {
-                Text(textFormat("subscription_save_year",saving.formatted(product.priceFormatStyle)))
+                Text(textFormat("subscription_save_year",formatted(saving, for:product)))
                     .font(.subheadline.bold()).foregroundStyle(ClubStyle.ink)
                     .padding(.horizontal,12).padding(.vertical,8)
                     .background(ClubStyle.lime,in:Capsule())
@@ -114,7 +116,7 @@ struct TeamSubscriptionView: View {
                 VStack(alignment:.leading,spacing:4) { priceLabel(product); periodLabel(yearly) }
             }
             if yearly {
-                Text(textFormat("subscription_month_equivalent",(product.price / 12).formatted(product.priceFormatStyle)))
+                Text(textFormat("subscription_month_equivalent",formatted(price.amount / 12, for:product)))
                     .font(.subheadline).foregroundStyle(ClubStyle.muted)
             }
             Text("subscription_team_limit").font(.subheadline).foregroundStyle(ClubStyle.muted)
@@ -126,8 +128,16 @@ struct TeamSubscriptionView: View {
             .background(yearly ? ClubStyle.elevated : ClubStyle.card,in:RoundedRectangle(cornerRadius:24))
             .overlay(RoundedRectangle(cornerRadius:24).stroke(yearly ? ClubStyle.lime : ClubStyle.border,lineWidth:1))
     }
+    private func display(_ product: Product) -> SubscriptionPriceDisplay {
+        SubscriptionPriceDisplay(productID:product.id, amount:product.price,
+            currency:product.priceFormatStyle.currencyCode,
+            sandbox:Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt")
+    }
+    private func formatted(_ amount: Decimal, for product: Product) -> String {
+        amount.formatted(.currency(code:display(product).currency).locale(AppLanguage.locale))
+    }
     private func priceLabel(_ product: Product) -> some View {
-        Text(product.displayPrice).font(ClubStyle.numberFont(40)).foregroundStyle(ClubStyle.text)
+        Text(formatted(display(product).amount, for:product)).font(ClubStyle.numberFont(40)).foregroundStyle(ClubStyle.text)
     }
     private func periodLabel(_ yearly: Bool) -> some View {
         Text(LocalizedStringKey(yearly ? "subscription_per_year" : "subscription_per_month"))

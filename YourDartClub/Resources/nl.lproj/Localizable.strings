@@ -257,6 +257,7 @@
 "subscription_choose_year" = "Kies jaarlijks";
 "subscription_confirmed" = "Aankoop gecontroleerd. De teamstatus is bijgewerkt.";
 "subscription_currency_notice" = "Apple geeft momenteel prijzen in een andere valuta dan euro terug. Controleer je App Store-regio; de prijs in Apples aankoopvenster is bepalend.";
+"subscription_european_reference" = "Europese tarieven voor deze test: €10 per maand of €100 per jaar. Apple bevestigt de prijs voor jouw App Store-regio in het aankoopvenster.";
 "subscription_events" = "Onbeperkt dartavonden en toernooien";
 "subscription_existing" = "Dit team heeft al een abonnement. Sluit geen tweede abonnement af.";
 "subscription_failed" = "Laden is niet gelukt. Controleer je verbinding en probeer opnieuw.";

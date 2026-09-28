@@ -257,6 +257,7 @@
 "subscription_choose_year" = "Choose yearly";
 "subscription_confirmed" = "Purchase verified. Team status has been updated.";
 "subscription_currency_notice" = "Apple is currently returning prices in a currency other than euros. Check your App Store region; the price in Apple’s purchase sheet applies.";
+"subscription_european_reference" = "European reference prices for this test: €10 per month or €100 per year. Apple confirms the price for your App Store region in the purchase sheet.";
 "subscription_events" = "Unlimited dart nights and tournaments";
 "subscription_existing" = "This team already has a subscription. Do not purchase a second subscription.";
 "subscription_failed" = "Loading failed. Check your connection and retry.";

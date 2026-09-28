@@ -191,3 +191,29 @@ enum EventAdvice {
     }
     static func simultaneous(_ count: Int, boards: Int) -> Int { min(max(0,boards),max(0,count / 2)) }
 }
+
+/// TestFlight sometimes supplies the US catalog while the purchase sheet uses
+/// the configured European tariff. These are reference tariffs, never an FX conversion.
+struct SubscriptionPriceDisplay {
+    let amount: Decimal
+    let currency: String
+    let usesEuropeanReference: Bool
+
+    init(productID: String, amount: Decimal, currency: String, sandbox: Bool) {
+        let reference: Decimal?
+        switch productID {
+        case "com.yourdartclub.iphone.team.monthly": reference = 10
+        case "com.yourdartclub.iphone.team.yearly": reference = 100
+        default: reference = nil
+        }
+        if sandbox, currency == "USD", let reference {
+            self.amount = reference
+            self.currency = "EUR"
+            usesEuropeanReference = true
+        } else {
+            self.amount = amount
+            self.currency = currency
+            usesEuropeanReference = false
+        }
+    }
+}

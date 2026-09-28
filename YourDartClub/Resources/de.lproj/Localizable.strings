@@ -257,6 +257,7 @@
 "subscription_choose_year" = "Jährlich wählen";
 "subscription_confirmed" = "Kauf geprüft. Der Teamstatus wurde aktualisiert.";
 "subscription_currency_notice" = "Apple liefert derzeit Preise in einer anderen Währung als Euro. Prüfe deine App-Store-Region; maßgeblich ist der Preis im Apple-Kauffenster.";
+"subscription_european_reference" = "Europäische Referenzpreise für diesen Test: 10 € monatlich oder 100 € jährlich. Apple bestätigt den Preis deiner App-Store-Region im Kauffenster.";
 "subscription_events" = "Unbegrenzte Dartabende und Turniere";
 "subscription_existing" = "Dieses Team hat bereits ein Abo. Schließe kein zweites Abo ab.";
 "subscription_failed" = "Laden fehlgeschlagen. Prüfe deine Verbindung und versuche es erneut.";
