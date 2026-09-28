@@ -253,20 +253,34 @@
 "storage_error" = "Échec de l’enregistrement. Attendez le rétablissement du stockage avant de saisir des scores.";
 "subscription" = "Abonnement";
 "subscription_binding_notice" = "Un abonnement Apple couvre une équipe. Dans ce groupe d’abonnements, votre compte Apple ne peut pas payer plusieurs équipes simultanément. Choisissez d’abord la bonne équipe.";
+"subscription_choose_month" = "Choisir l’offre mensuelle";
+"subscription_choose_year" = "Choisir l’offre annuelle";
 "subscription_confirmed" = "Achat vérifié. Le statut de l’équipe a été mis à jour.";
+"subscription_currency_notice" = "Apple renvoie actuellement des prix dans une autre devise que l’euro. Vérifiez la région de votre App Store ; le prix affiché dans la fenêtre d’achat Apple fait foi.";
+"subscription_events" = "Soirées et tournois illimités";
 "subscription_existing" = "Cette équipe possède déjà un abonnement. Ne souscrivez pas un second abonnement.";
 "subscription_failed" = "Chargement impossible. Vérifiez votre connexion et réessayez.";
+"subscription_heading" = "Toute l’équipe participe.";
+"subscription_live" = "Scores en direct et affichage TV";
 "subscription_manage" = "Gérer l’abonnement Apple";
+"subscription_month_equivalent" = "Soit %@ par mois · facturé annuellement";
 "subscription_monthly" = "Abonnement mensuel";
 "subscription_no_purchase" = "Aucun achat trouvé pour cette équipe et ce compte Apple.";
 "subscription_notice" = "Accès pour 15 participants maximum. L’abonnement est lié à cette équipe et fonctionne aussi sur la plateforme.";
 "subscription_other_team" = "Cet abonnement Apple appartient à une autre équipe. Ouvrez cette équipe pour restaurer votre achat.";
 "subscription_pending" = "Votre achat attend l’approbation Apple. L’accès payant n’est pas encore accordé.";
+"subscription_per_month" = "/ mois";
+"subscription_per_year" = "/ an";
 "subscription_privacy" = "Confidentialité";
 "subscription_refund" = "Demander un remboursement Apple";
 "subscription_reload" = "Recharger";
 "subscription_renewal_notice" = "Paiement via votre compte Apple. L’abonnement se renouvelle automatiquement jusqu’à résiliation. Gérez-le dans vos abonnements Apple.";
 "subscription_restore" = "Restaurer les achats";
+"subscription_save_year" = "Économisez %@ par an";
+"subscription_stats" = "Statistiques et historique de l’équipe";
+"subscription_store_intent" = "Connectez-vous et ouvrez Abonnement pour votre équipe afin de poursuivre votre achat App Store. Créez une équipe si vous n’en avez pas.";
+"subscription_store_selected" = "Sélectionné dans l’App Store";
+"subscription_team_limit" = "Par équipe · jusqu’à 15 joueurs";
 "subscription_terms" = "Conditions d’utilisation";
 "subscription_unavailable" = "Les abonnements sont indisponibles. Réessayez plus tard.";
 "subscription_verify_failed" = "La plateforme n’a pas encore confirmé l’achat. Essayez Restaurer les achats ; n’achetez pas à nouveau.";
@@ -338,7 +352,3 @@
 "winner" = "Victoire !";
 "winner_name" = "%@ gagne !";
 "your_turn" = "À vous de jouer";
-
-"subscription_store_intent" = "Connectez-vous et ouvrez Abonnement pour votre équipe afin de poursuivre votre achat App Store. Créez une équipe si vous n’en avez pas.";
-
-"subscription_store_selected" = "Sélectionné dans l’App Store";

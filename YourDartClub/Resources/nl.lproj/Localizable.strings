@@ -253,20 +253,34 @@
 "storage_error" = "Opslaan is niet gelukt. Voer geen nieuwe scores in voordat opslag weer werkt.";
 "subscription" = "Abonnement";
 "subscription_binding_notice" = "Eén Apple-abonnement geldt voor één team. Binnen deze abonnementsgroep kan je Apple-account niet tegelijk voor meerdere teams betalen. Kies daarom eerst het juiste team.";
+"subscription_choose_month" = "Kies maandelijks";
+"subscription_choose_year" = "Kies jaarlijks";
 "subscription_confirmed" = "Aankoop gecontroleerd. De teamstatus is bijgewerkt.";
+"subscription_currency_notice" = "Apple geeft momenteel prijzen in een andere valuta dan euro terug. Controleer je App Store-regio; de prijs in Apples aankoopvenster is bepalend.";
+"subscription_events" = "Onbeperkt dartavonden en toernooien";
 "subscription_existing" = "Dit team heeft al een abonnement. Sluit geen tweede abonnement af.";
 "subscription_failed" = "Laden is niet gelukt. Controleer je verbinding en probeer opnieuw.";
+"subscription_heading" = "Het hele team doet mee.";
+"subscription_live" = "Live scores en tv-weergave";
 "subscription_manage" = "Apple-abonnement beheren";
+"subscription_month_equivalent" = "Omgerekend %@ per maand · jaarlijks betaald";
 "subscription_monthly" = "Maandabonnement";
 "subscription_no_purchase" = "Geen aankoop gevonden voor dit team en Apple-account.";
 "subscription_notice" = "Teamtoegang voor maximaal 15 deelnemers. Het abonnement wordt aan dit team gekoppeld en werkt ook op het platform.";
 "subscription_other_team" = "Dit Apple-abonnement hoort bij een ander team. Open dat team om je aankoop te herstellen.";
 "subscription_pending" = "Je aankoop wacht op goedkeuring van Apple. Je wordt nog niet als betaald gemarkeerd.";
+"subscription_per_month" = "/ maand";
+"subscription_per_year" = "/ jaar";
 "subscription_privacy" = "Privacybeleid";
 "subscription_refund" = "Terugbetaling bij Apple aanvragen";
 "subscription_reload" = "Opnieuw laden";
 "subscription_renewal_notice" = "Betaling via je Apple-account. Het abonnement wordt automatisch verlengd tot je het opzegt. Beheer of beëindig je abonnement via je Apple-abonnementen.";
 "subscription_restore" = "Aankopen herstellen";
+"subscription_save_year" = "Bespaar %@ per jaar";
+"subscription_stats" = "Statistieken en historie voor je team";
+"subscription_store_intent" = "Log in en kies bij je team Abonnement om je App Store-aankoop voort te zetten. Maak eerst een team aan als je er nog geen hebt.";
+"subscription_store_selected" = "Gekozen in de App Store";
+"subscription_team_limit" = "Per team · tot 15 spelers";
 "subscription_terms" = "Gebruiksvoorwaarden";
 "subscription_unavailable" = "Abonnementen zijn momenteel niet beschikbaar. Probeer het later opnieuw.";
 "subscription_verify_failed" = "De aankoop kon nog niet worden bevestigd bij het platform. Probeer Aankopen herstellen; koop niet opnieuw.";
@@ -338,7 +352,3 @@
 "winner" = "Gewonnen!";
 "winner_name" = "%@ wint!";
 "your_turn" = "Aan de beurt";
-
-"subscription_store_intent" = "Log in en kies bij je team Abonnement om je App Store-aankoop voort te zetten. Maak eerst een team aan als je er nog geen hebt.";
-
-"subscription_store_selected" = "Gekozen in de App Store";

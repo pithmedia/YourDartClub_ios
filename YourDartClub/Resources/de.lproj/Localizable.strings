@@ -253,20 +253,34 @@
 "storage_error" = "Speichern fehlgeschlagen. Gib erst weitere Punkte ein, wenn das Speichern wieder funktioniert.";
 "subscription" = "Abonnement";
 "subscription_binding_notice" = "Ein Apple-Abo gilt für ein Team. Innerhalb dieser Abogruppe kann dein Apple-Konto nicht gleichzeitig mehrere Teams bezahlen. Wähle zuerst das richtige Team.";
+"subscription_choose_month" = "Monatlich wählen";
+"subscription_choose_year" = "Jährlich wählen";
 "subscription_confirmed" = "Kauf geprüft. Der Teamstatus wurde aktualisiert.";
+"subscription_currency_notice" = "Apple liefert derzeit Preise in einer anderen Währung als Euro. Prüfe deine App-Store-Region; maßgeblich ist der Preis im Apple-Kauffenster.";
+"subscription_events" = "Unbegrenzte Dartabende und Turniere";
 "subscription_existing" = "Dieses Team hat bereits ein Abo. Schließe kein zweites Abo ab.";
 "subscription_failed" = "Laden fehlgeschlagen. Prüfe deine Verbindung und versuche es erneut.";
+"subscription_heading" = "Das ganze Team ist dabei.";
+"subscription_live" = "Live-Spielstände und TV-Anzeige";
 "subscription_manage" = "Apple-Abo verwalten";
+"subscription_month_equivalent" = "Entspricht %@ pro Monat · jährlich bezahlt";
 "subscription_monthly" = "Monatsabo";
 "subscription_no_purchase" = "Kein Kauf für dieses Team und Apple-Konto gefunden.";
 "subscription_notice" = "Teamzugang für bis zu 15 Teilnehmer. Das Abo wird diesem Team zugeordnet und gilt auch auf der Plattform.";
 "subscription_other_team" = "Dieses Apple-Abo gehört zu einem anderen Team. Öffne dieses Team, um den Kauf wiederherzustellen.";
 "subscription_pending" = "Dein Kauf wartet auf Apples Freigabe. Der bezahlte Zugang ist noch nicht aktiv.";
+"subscription_per_month" = "/ Monat";
+"subscription_per_year" = "/ Jahr";
 "subscription_privacy" = "Datenschutz";
 "subscription_refund" = "Erstattung bei Apple beantragen";
 "subscription_reload" = "Neu laden";
 "subscription_renewal_notice" = "Zahlung über dein Apple-Konto. Das Abo verlängert sich automatisch bis zur Kündigung. Verwalte oder kündige es in deinen Apple-Abonnements.";
 "subscription_restore" = "Käufe wiederherstellen";
+"subscription_save_year" = "Spare %@ pro Jahr";
+"subscription_stats" = "Teamstatistiken und Verlauf";
+"subscription_store_intent" = "Melde dich an und öffne Abonnement für dein Team, um deinen App Store-Kauf fortzusetzen. Erstelle zuerst ein Team, falls du noch keines hast.";
+"subscription_store_selected" = "Im App Store ausgewählt";
+"subscription_team_limit" = "Pro Team · bis zu 15 Spieler";
 "subscription_terms" = "Nutzungsbedingungen";
 "subscription_unavailable" = "Abonnements sind momentan nicht verfügbar. Versuche es später erneut.";
 "subscription_verify_failed" = "Die Plattform konnte den Kauf noch nicht bestätigen. Versuche Käufe wiederherstellen; kaufe nicht erneut.";
@@ -338,7 +352,3 @@
 "winner" = "Gewonnen!";
 "winner_name" = "%@ gewinnt!";
 "your_turn" = "Am Wurf";
-
-"subscription_store_intent" = "Melde dich an und öffne Abonnement für dein Team, um deinen App Store-Kauf fortzusetzen. Erstelle zuerst ein Team, falls du noch keines hast.";
-
-"subscription_store_selected" = "Im App Store ausgewählt";

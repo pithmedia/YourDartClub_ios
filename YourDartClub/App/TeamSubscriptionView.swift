@@ -41,6 +41,7 @@ struct CreateTeamView: View {
     }
 }
 struct TeamSubscriptionView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var model: AppModel
     let team: Team
     @State private var options: SubscriptionOptions?
@@ -48,43 +49,89 @@ struct TeamSubscriptionView: View {
     @State private var busy = false
     @State private var message: String?
     var body: some View {
-        Form {
-            Section {
-                Text(team.name).font(.headline)
-                Text("subscription_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
-                Text("subscription_binding_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+        ScrollView {
+            VStack(alignment:.leading,spacing:20) {
+                VStack(alignment:.leading,spacing:12) {
+                    Label(team.name,systemImage:"person.3.fill").font(.headline).foregroundStyle(ClubStyle.lime)
+                    Text("subscription_heading").font(.title2.bold())
+                    Text("subscription_notice").font(.subheadline).foregroundStyle(ClubStyle.muted)
+                    Label("subscription_events",systemImage:"trophy").font(.subheadline)
+                    Label("subscription_live",systemImage:"tv").font(.subheadline)
+                    Label("subscription_stats",systemImage:"chart.bar").font(.subheadline)
+                }.frame(maxWidth:.infinity,alignment:.leading).clubCard()
                 if let message { Text(LocalizedStringKey(message)).foregroundStyle(ClubStyle.lime) }
                 if let options {
                     if !options.available { Text("subscription_unavailable") }
                     else if !options.canPurchase { Text("subscription_existing") }
                     else {
-                        ForEach(products) { product in
-                            Button { purchase(product) } label: {
-                                VStack(alignment:.leading,spacing:6) {
-                                    Text(LocalizedStringKey(options.products.first { $0.id == product.id }?.period == "yearly" ? "subscription_yearly" : "subscription_monthly")).font(.headline)
-                                    Text(product.displayPrice).font(ClubStyle.numberFont(26))
-                                    if model.pendingStoreProduct?.id == product.id {
-                                        Text("subscription_store_selected").font(.caption)
-                                    }
-                                }.frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,6)
-                            }.buttonStyle(ClubButton(primary:true)).disabled(busy)
-                        }
+                        ForEach(products) { product in priceCard(product) }
                         if products.isEmpty { Text("subscription_unavailable") }
+                        if products.contains(where: { $0.priceFormatStyle.currencyCode != "EUR" }) {
+                            Text("subscription_currency_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+                        }
                     }
-                } else { ProgressView() }
-            }.listRowBackground(ClubStyle.card)
-            Section {
-                Button("subscription_restore") { restore() }.disabled(busy || options?.available != true)
-                YourDartClubSubscriptionManagement(groupID:products.first?.subscription?.subscriptionGroupID).disabled(busy)
-                Button("subscription_reload") { Task { await load() } }.disabled(busy)
-            }.listRowBackground(ClubStyle.card)
-            Section {
-                Text("subscription_renewal_notice").font(.footnote)
-                LegalLinks()
-                Link("subscription_refund",destination:URL(string:"https://reportaproblem.apple.com/")!)
-            }.foregroundStyle(ClubStyle.muted)
-        }.clubScreen().navigationTitle("").navigationBarTitleDisplayMode(.inline).toolbar(.visible,for:.navigationBar)
+                } else { ProgressView().frame(maxWidth:.infinity) }
+                VStack(alignment:.leading,spacing:16) {
+                    Button("subscription_restore") { restore() }.disabled(busy || options?.available != true)
+                    YourDartClubSubscriptionManagement(groupID:products.first?.subscription?.subscriptionGroupID).disabled(busy)
+                    Button("subscription_reload") { Task { await load() } }.disabled(busy)
+                }.frame(maxWidth:.infinity,alignment:.leading).clubCard()
+                VStack(alignment:.leading,spacing:12) {
+                    Text("subscription_binding_notice")
+                    Text("subscription_renewal_notice")
+                    LegalLinks()
+                    Link("subscription_refund",destination:URL(string:"https://reportaproblem.apple.com/")!)
+                }.font(.footnote).foregroundStyle(ClubStyle.muted)
+            }.padding(20).frame(maxWidth:620).frame(maxWidth:.infinity)
+        }.background(ClubStyle.background).tint(ClubStyle.lime)
+            .navigationTitle("").navigationBarTitleDisplayMode(.inline).toolbar(.visible,for:.navigationBar)
             .task { await load() }
+            .task {
+                for await _ in Storefront.updates {
+                    if !busy { await load() }
+                }
+            }
+            .onChange(of:scenePhase) { _, phase in
+                if phase == .active && !busy { Task { await load() } }
+            }
+    }
+    private func priceCard(_ product: Product) -> some View {
+        let yearly = options?.products.first { $0.id == product.id }?.period == "yearly"
+        let monthly = products.first { item in options?.products.first { $0.id == item.id }?.period == "monthly" }
+        let saving: Decimal? = yearly && monthly?.priceFormatStyle.currencyCode == product.priceFormatStyle.currencyCode
+            ? monthly.map { $0.price * 12 - product.price } : nil
+        return VStack(alignment:.leading,spacing:16) {
+            if let saving, saving > 0 {
+                Text(textFormat("subscription_save_year",saving.formatted(product.priceFormatStyle)))
+                    .font(.subheadline.bold()).foregroundStyle(ClubStyle.ink)
+                    .padding(.horizontal,12).padding(.vertical,8)
+                    .background(ClubStyle.lime,in:Capsule())
+            }
+            Text(LocalizedStringKey(yearly ? "subscription_yearly" : "subscription_monthly"))
+                .font(.headline).foregroundStyle(yearly ? ClubStyle.lime : ClubStyle.text)
+            ViewThatFits(in:.horizontal) {
+                HStack(alignment:.firstTextBaseline,spacing:8) { priceLabel(product); periodLabel(yearly) }
+                VStack(alignment:.leading,spacing:4) { priceLabel(product); periodLabel(yearly) }
+            }
+            if yearly {
+                Text(textFormat("subscription_month_equivalent",(product.price / 12).formatted(product.priceFormatStyle)))
+                    .font(.subheadline).foregroundStyle(ClubStyle.muted)
+            }
+            Text("subscription_team_limit").font(.subheadline).foregroundStyle(ClubStyle.muted)
+            Button { purchase(product) } label: {
+                Label(yearly ? "subscription_choose_year" : "subscription_choose_month",systemImage:"checkmark.circle")
+            }.buttonStyle(ClubButton(primary:yearly)).disabled(busy)
+            if model.pendingStoreProduct?.id == product.id { Text("subscription_store_selected").font(.caption) }
+        }.padding(22).frame(maxWidth:.infinity,alignment:.leading)
+            .background(yearly ? ClubStyle.elevated : ClubStyle.card,in:RoundedRectangle(cornerRadius:24))
+            .overlay(RoundedRectangle(cornerRadius:24).stroke(yearly ? ClubStyle.lime : ClubStyle.border,lineWidth:1))
+    }
+    private func priceLabel(_ product: Product) -> some View {
+        Text(product.displayPrice).font(ClubStyle.numberFont(40)).foregroundStyle(ClubStyle.text)
+    }
+    private func periodLabel(_ yearly: Bool) -> some View {
+        Text(LocalizedStringKey(yearly ? "subscription_per_year" : "subscription_per_month"))
+            .font(.subheadline).foregroundStyle(ClubStyle.muted)
     }
     private func load() async {
         busy = true; defer { busy = false }

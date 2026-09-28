@@ -253,20 +253,34 @@
 "storage_error" = "Saving failed. Do not enter new scores until storage works again.";
 "subscription" = "Subscription";
 "subscription_binding_notice" = "One Apple subscription covers one team. Within this subscription group your Apple account cannot pay for multiple teams at once. Choose the correct team first.";
+"subscription_choose_month" = "Choose monthly";
+"subscription_choose_year" = "Choose yearly";
 "subscription_confirmed" = "Purchase verified. Team status has been updated.";
+"subscription_currency_notice" = "Apple is currently returning prices in a currency other than euros. Check your App Store region; the price in Apple’s purchase sheet applies.";
+"subscription_events" = "Unlimited dart nights and tournaments";
 "subscription_existing" = "This team already has a subscription. Do not purchase a second subscription.";
 "subscription_failed" = "Loading failed. Check your connection and retry.";
+"subscription_heading" = "The whole team is in.";
+"subscription_live" = "Live scores and TV display";
 "subscription_manage" = "Manage Apple subscription";
+"subscription_month_equivalent" = "Equivalent to %@ per month · billed yearly";
 "subscription_monthly" = "Monthly subscription";
 "subscription_no_purchase" = "No purchase found for this team and Apple account.";
 "subscription_notice" = "Team access for up to 15 participants. The subscription is linked to this team and also works on the platform.";
 "subscription_other_team" = "This Apple subscription belongs to another team. Open that team to restore your purchase.";
 "subscription_pending" = "Your purchase is awaiting Apple approval. Paid access has not been granted yet.";
+"subscription_per_month" = "/ month";
+"subscription_per_year" = "/ year";
 "subscription_privacy" = "Privacy policy";
 "subscription_refund" = "Request an Apple refund";
 "subscription_reload" = "Reload";
 "subscription_renewal_notice" = "Payment through your Apple account. Your subscription renews automatically until cancelled. Manage or cancel it through your Apple subscriptions.";
 "subscription_restore" = "Restore purchases";
+"subscription_save_year" = "Save %@ per year";
+"subscription_stats" = "Team statistics and history";
+"subscription_store_intent" = "Sign in and open Subscription for your team to continue your App Store purchase. Create a team first if you do not have one.";
+"subscription_store_selected" = "Selected in the App Store";
+"subscription_team_limit" = "Per team · up to 15 players";
 "subscription_terms" = "Terms of use";
 "subscription_unavailable" = "Subscriptions are currently unavailable. Please try again later.";
 "subscription_verify_failed" = "The platform could not confirm the purchase yet. Try Restore purchases; do not buy again.";
@@ -338,7 +352,3 @@
 "winner" = "Winner!";
 "winner_name" = "%@ wins!";
 "your_turn" = "Your turn";
-
-"subscription_store_intent" = "Sign in and open Subscription for your team to continue your App Store purchase. Create a team first if you do not have one.";
-
-"subscription_store_selected" = "Selected in the App Store";
