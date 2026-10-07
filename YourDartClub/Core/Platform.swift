@@ -1,5 +1,67 @@
 import Foundation
 
+struct CompetitionSettings: Decodable, Equatable {
+    let season: String
+    let division: String
+    let teamId: String
+    let name: String
+    let venue: String
+}
+struct CompetitionStanding: Decodable, Equatable, Identifiable {
+    let id: String
+    let name: String
+    let position: Int
+    let played: Int
+    let won: Int
+    let lost: Int
+    let points: String
+    let average: String
+    let penalty: String
+}
+struct CompetitionFixture: Decodable, Equatable, Identifiable {
+    let id: String
+    let date: String
+    let homeId: String
+    let awayId: String
+    let home: String
+    let away: String
+    let score: String?
+}
+struct CompetitionTeamOption: Decodable, Equatable, Identifiable { let id: String; let name: String }
+struct CompetitionOptions: Decodable, Equatable { let divisions: [String]; let teams: [CompetitionTeamOption] }
+struct CompetitionOverview: Decodable, Equatable {
+    let settings: CompetitionSettings?
+    let canManage: Bool
+    let currentSeason: String
+    let standings: [CompetitionStanding]?
+    let fixtures: [CompetitionFixture]?
+    let fetchedAt: TimeInterval?
+    let stale: Bool?
+    let unavailable: Bool?
+    let source: URL?
+    let teamSource: URL?
+    var table: [CompetitionStanding] { standings ?? [] }
+    var schedule: [CompetitionFixture] { (fixtures ?? []).filter { $0.score == nil } }
+    var results: [CompetitionFixture] { (fixtures ?? []).filter { $0.score != nil } }
+}
+enum CompetitionPolicy {
+    static let pollInterval: TimeInterval = 60
+    static func shouldPoll(screenVisible: Bool, appActive: Bool) -> Bool { screenVisible && appActive }
+    static func visible(language: String, overview: CompetitionOverview?) -> Bool {
+        language == "nl" || overview?.settings != nil
+    }
+    static func manageable(language: String, overview: CompetitionOverview) -> Bool {
+        language == "nl" && overview.canManage
+    }
+    static func seasons(current: String, linked: String?) -> [String] {
+        let start = Int(current.split(separator:"-").first ?? "")
+        let previous = start.map { String(format:"%02d-%02d",($0 + 99) % 100,$0) }
+        var result: [String] = []
+        for value in [current,previous,linked].compactMap({$0}) where !value.isEmpty && !result.contains(value) { result.append(value) }
+        return result
+    }
+}
+
 struct PlatformPlayer: Decodable, Identifiable { let id: String; let name: String; let nickname: String? }
 struct PlatformSnapshot: Decodable {
     let players: [PlatformPlayer]

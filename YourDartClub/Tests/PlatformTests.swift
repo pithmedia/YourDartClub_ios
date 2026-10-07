@@ -31,6 +31,71 @@ final class PlatformTests: XCTestCase {
     }
 }
 
+final class CompetitionTests: XCTestCase {
+    private func overview(stale: Bool = false, unavailable: Bool = false) throws -> CompetitionOverview {
+        let json = """
+        {
+          "settings":{"season":"26-27","division":"4G","teamId":"84086535","name":"Flight Club","venue":"Café De Proeverij"},
+          "canManage":true,"currentSeason":"26-27",
+          "standings":[
+            {"id":"111","name":"Rivals","position":1,"played":2,"won":2,"lost":0,"points":"10","average":"5.0","penalty":""},
+            {"id":"84086535","name":"Flight Club","position":2,"played":2,"won":1,"lost":1,"points":"9","average":"4.5","penalty":""}
+          ],
+          "fixtures":[
+            {"id":"upcoming","date":"2026-10-13","homeId":"84086535","awayId":"111","home":"Flight Club","away":"Rivals","score":null},
+            {"id":"played","date":"2026-10-06","homeId":"111","awayId":"84086535","home":"Rivals","away":"Flight Club","score":"4-5"}
+          ],
+          "fetchedAt":1791300000,"stale":\(stale),"unavailable":\(unavailable),
+          "source":"https://feeds.teambeheer.nl/web/stand/?d=41&div=4G&s=26-27",
+          "teamSource":"https://feeds.teambeheer.nl/web/team?d=41&t=84086535&s=26-27"
+        }
+        """
+        return try JSONDecoder().decode(CompetitionOverview.self,from:Data(json.utf8))
+    }
+    func testFlightClubReferenceDecodesFullStandingsScheduleResultsVenueAndSources() throws {
+        let data = try overview()
+        XCTAssertEqual(data.settings?.name,"Flight Club")
+        XCTAssertEqual(data.settings?.venue,"Café De Proeverij")
+        XCTAssertEqual(data.table.count,2)
+        XCTAssertEqual(data.table.first(where:{$0.id == "84086535"})?.position,2)
+        XCTAssertEqual(data.schedule.map(\.id),["upcoming"])
+        XCTAssertEqual(data.results.map(\.id),["played"])
+        XCTAssertEqual(data.results.first?.score,"4-5")
+        XCTAssertEqual(data.source?.host,"feeds.teambeheer.nl")
+        XCTAssertEqual(data.teamSource?.host,"feeds.teambeheer.nl")
+    }
+    func testSetupVisibilityAndManagementRespectLanguageAndExistingLink() throws {
+        let linked = try overview()
+        XCTAssertTrue(CompetitionPolicy.visible(language:"nl",overview:nil))
+        XCTAssertFalse(CompetitionPolicy.visible(language:"en",overview:nil))
+        for language in ["nl","en","fr","de"] { XCTAssertTrue(CompetitionPolicy.visible(language:language,overview:linked)) }
+        XCTAssertTrue(CompetitionPolicy.manageable(language:"nl",overview:linked))
+        for language in ["en","fr","de"] { XCTAssertFalse(CompetitionPolicy.manageable(language:language,overview:linked)) }
+        let readOnly = try JSONDecoder().decode(CompetitionOverview.self,from:Data("{\"settings\":null,\"canManage\":false,\"currentSeason\":\"26-27\"}".utf8))
+        XCTAssertFalse(CompetitionPolicy.manageable(language:"nl",overview:readOnly))
+    }
+    func testRefreshPolicyRunsEachMinuteOnlyForVisibleActiveScreen() {
+        XCTAssertEqual(CompetitionPolicy.pollInterval,60)
+        XCTAssertTrue(CompetitionPolicy.shouldPoll(screenVisible:true,appActive:true))
+        XCTAssertFalse(CompetitionPolicy.shouldPoll(screenVisible:false,appActive:true))
+        XCTAssertFalse(CompetitionPolicy.shouldPoll(screenVisible:true,appActive:false))
+        XCTAssertFalse(CompetitionPolicy.shouldPoll(screenVisible:false,appActive:false))
+    }
+    func testStaleSourceResponseKeepsLastSuccessfulDataVisible() throws {
+        let data = try overview(stale:true)
+        XCTAssertEqual(data.stale,true)
+        XCTAssertEqual(data.unavailable,false)
+        XCTAssertEqual(data.table.count,2)
+        XCTAssertEqual(data.schedule.count,1)
+        XCTAssertNotNil(data.fetchedAt)
+    }
+    func testSeasonChoicesMatchWebsiteCurrentPreviousAndLinkedBehavior() {
+        XCTAssertEqual(CompetitionPolicy.seasons(current:"26-27",linked:nil),["26-27","25-26"])
+        XCTAssertEqual(CompetitionPolicy.seasons(current:"26-27",linked:"24-25"),["26-27","25-26","24-25"])
+        XCTAssertEqual(CompetitionPolicy.seasons(current:"26-27",linked:"26-27"),["26-27","25-26"])
+    }
+}
+
 final class TeamStatisticsTests: XCTestCase {
     private func fixture(track: Bool = true, initial: Int = 501, visits: [[String:Any]]? = nil) throws -> PlatformSnapshot {
         func visit(_ score: Int,_ bust: Bool = false,_ finish: Bool = false,_ darts: Int = 3) -> [String:Any] {

@@ -8,12 +8,16 @@ struct MobileAPI {
     let base: URL
     let token: String?
     var team: Int?
-    func request(_ path: String, body: Data? = nil) async throws -> Data {
+    func request(_ path: String, query: [URLQueryItem] = [], body: Data? = nil) async throws -> Data {
         guard base.scheme == "https" else { throw APIError(status: 0) }
-        var request = URLRequest(url: base.appendingPathComponent("api/mobile/v1/" + path))
+        var components = URLComponents(url:base.appendingPathComponent("api/mobile/v1/" + path),resolvingAgainstBaseURL:false)
+        if !query.isEmpty { components?.queryItems = query }
+        guard let url = components?.url else { throw APIError(status:0) }
+        var request = URLRequest(url:url)
         request.httpMethod = body == nil ? "GET" : "POST"; request.httpBody = body; request.timeoutInterval = 20
         request.setValue("application/json",forHTTPHeaderField: "Accept")
         if body != nil { request.setValue("application/json",forHTTPHeaderField: "Content-Type") }
+        request.setValue(AppLanguage.code,forHTTPHeaderField:"X-App-Language")
         if let token { request.setValue("Bearer \(token)",forHTTPHeaderField: "Authorization") }
         if let team { request.setValue(String(team),forHTTPHeaderField: "X-Team-Id") }
         let config = URLSessionConfiguration.ephemeral

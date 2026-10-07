@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TeamView: View {
     @EnvironmentObject var model: AppModel
+    @AppStorage(AppLanguage.preference) private var language = ""
     @State private var create = false
     var body: some View {
         NavigationStack {
@@ -15,6 +16,14 @@ struct TeamView: View {
                         NavigationLink { TeamStatisticsView(team:model.selectedTeam) } label: { Label("team_statistics",systemImage:"chart.bar.xaxis") }
                         NavigationLink { TeamHistoryView(team:model.selectedTeam) } label: { Label("team_history",systemImage:"clock.arrow.circlepath") }
                         NavigationLink { TeamParticipantsView(team:model.selectedTeam) } label: { Label("team_participants",systemImage:"person.3") }
+                        if teamActive && CompetitionPolicy.visible(language:languageCode,overview:model.competition) {
+                            NavigationLink { CompetitionView(team:model.selectedTeam) } label: {
+                                VStack(alignment:.leading,spacing:4) {
+                                    Label("competition_title",systemImage:"trophy")
+                                    if let name = model.competition?.settings?.name { Text(name).font(.caption).foregroundStyle(ClubStyle.muted) }
+                                }
+                            }
+                        }
                     }.listRowBackground(ClubStyle.card)
                     Section("team_events") {
                         if model.evenings.filter({ $0.status == "active" }).isEmpty { Text("no_evenings") }
@@ -30,12 +39,263 @@ struct TeamView: View {
                     }
                 } else { Text("login_required") }
             }.clubScreen().toolbar(.hidden,for:.navigationBar)
-                .refreshable { await model.refresh(force:true) }
-                .onChange(of:model.selectedTeam) { _,_ in model.evenings = []; model.teamPlayers = []; Task { await model.refresh(force:true) } }
+                .refreshable { await model.refresh(force:true); await loadCompetition() }
+                .onChange(of:model.selectedTeam) { _,_ in model.evenings = []; model.teamPlayers = []; model.clearCompetition(); Task { await model.refresh(force:true); await loadCompetition() } }
+                .task(id:"\(model.selectedTeam)-\(languageCode)") { await loadCompetition() }
                 .sheet(isPresented:$create) { CreateEventView(team:model.selectedTeam) }
         }
     }
-    private var active: Bool { model.online && model.account?.teams.contains { $0.id == model.selectedTeam && $0.active } == true }
+    private var languageCode: String { AppLanguage.supported.contains(language) ? language : AppLanguage.code }
+    private var teamActive: Bool { model.account?.teams.contains { $0.id == model.selectedTeam && $0.active } == true }
+    private var active: Bool { model.online && teamActive }
+    private func loadCompetition() async {
+        guard active else { return }
+        _ = try? await model.loadCompetition(team:model.selectedTeam,language:languageCode)
+    }
+}
+
+struct CompetitionView: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage(AppLanguage.preference) private var language = ""
+    let team: Int
+    @State private var loading = false
+    @State private var optionsLoading = false
+    @State private var saving = false
+    @State private var editing = false
+    @State private var unlinking = false
+    @State private var message: String?
+    @State private var season = ""
+    @State private var division = ""
+    @State private var dbmnTeam = ""
+    @State private var options = CompetitionOptions(divisions:[],teams:[])
+    var body: some View {
+        Group {
+            if let data = model.competition {
+                List {
+                    if let message { Section { Label(message,systemImage:"exclamationmark.triangle.fill").foregroundStyle(.orange) }.listRowBackground(ClubStyle.card) }
+                    if CompetitionPolicy.manageable(language:languageCode,overview:data) && editing { settings(data) }
+                    if let linked = data.settings {
+                        summary(linked,data:data)
+                        if data.stale == true || data.unavailable == true {
+                            Section {
+                                Label(data.stale == true ? "competition_stale" : "competition_unavailable",systemImage:"wifi.exclamationmark")
+                                    .foregroundStyle(.orange)
+                            }.listRowBackground(ClubStyle.card)
+                        }
+                        if data.unavailable != true {
+                            standings(data,own:linked.teamId)
+                            fixtures("competition_schedule",rows:data.schedule,own:linked.teamId,empty:"competition_schedule_empty")
+                            if !data.results.isEmpty { fixtures("competition_results",rows:data.results,own:linked.teamId,empty:nil) }
+                        }
+                        sources(data)
+                    } else if !CompetitionPolicy.manageable(language:languageCode,overview:data) {
+                        Section { ContentUnavailableView("competition_not_linked",systemImage:"trophy") }.listRowBackground(ClubStyle.card)
+                    }
+                }.clubScreen().refreshable { await load() }
+            } else if loading {
+                ProgressView("competition_loading").frame(maxWidth:.infinity,maxHeight:.infinity).background(ClubStyle.background)
+            } else {
+                ContentUnavailableView("competition_load_failed",systemImage:"wifi.exclamationmark")
+                    .background(ClubStyle.background)
+            }
+        }
+        .navigationTitle(tr("competition_title")).navigationBarTitleDisplayMode(.inline).toolbar(.visible,for:.navigationBar)
+        .task(id:"\(scenePhase)-\(languageCode)") {
+            guard CompetitionPolicy.shouldPoll(screenVisible:true,appActive:scenePhase == .active) else { return }
+            await load()
+            while !Task.isCancelled {
+                do { try await Task.sleep(for:.seconds(CompetitionPolicy.pollInterval)) } catch { break }
+                guard CompetitionPolicy.shouldPoll(screenVisible:true,appActive:scenePhase == .active) else { break }
+                await load()
+            }
+        }
+        .onChange(of:model.selectedTeam) { _,value in if value != team { dismiss() } }
+        .onChange(of:languageCode) { _,value in if value != "nl" { editing = false } }
+        .confirmationDialog("competition_unlink",isPresented:$unlinking,titleVisibility:.visible) {
+            Button("competition_unlink",role:.destructive) { Task { await save(enabled:false) } }
+            Button("cancel",role:.cancel) {}
+        } message: { Text("competition_unlink_notice") }
+    }
+    private var languageCode: String { AppLanguage.supported.contains(language) ? language : AppLanguage.code }
+    @ViewBuilder private func settings(_ data: CompetitionOverview) -> some View {
+        Section("competition_link_title") {
+            Text("competition_link_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+            Picker("competition_season",selection:$season) {
+                ForEach(CompetitionPolicy.seasons(current:data.currentSeason,linked:data.settings?.season),id:\.self) { Text($0).tag($0) }
+            }
+            Picker("competition_division",selection:$division) {
+                Text("competition_select_division").tag("")
+                ForEach(options.divisions,id:\.self) { Text($0).tag($0) }
+            }.disabled(optionsLoading)
+            Picker("competition_team",selection:$dbmnTeam) {
+                Text("competition_select_team").tag("")
+                ForEach(options.teams) { Text($0.name).tag($0.id) }
+            }.disabled(optionsLoading || division.isEmpty)
+            if optionsLoading { ProgressView("competition_options_loading") }
+            Button { Task { await save(enabled:true) } } label: { Label(saving ? "competition_saving" : "competition_link",systemImage:"link") }
+                .buttonStyle(ClubButton(primary:true)).disabled(saving || optionsLoading || dbmnTeam.isEmpty)
+            if data.settings != nil {
+                Button("cancel") { editing = false }
+                Button("competition_unlink",role:.destructive) { unlinking = true }.disabled(saving)
+            }
+        }.listRowBackground(ClubStyle.card)
+        .onChange(of:season) { old,value in
+            guard old != value else { return }
+            division = ""; dbmnTeam = ""; Task { await loadOptions() }
+        }
+        .onChange(of:division) { old,value in
+            guard old != value, !value.isEmpty else { return }
+            dbmnTeam = ""; Task { await loadOptions() }
+        }
+    }
+    @ViewBuilder private func summary(_ linked: CompetitionSettings, data: CompetitionOverview) -> some View {
+        Section {
+            VStack(alignment:.leading,spacing:8) {
+                Text("DBMN · \(linked.season) · \(tr("competition_division")) \(linked.division)").font(.caption.bold()).foregroundStyle(ClubStyle.lime)
+                Text(linked.name).font(.title2.bold())
+                if !linked.venue.isEmpty { Label(linked.venue,systemImage:"mappin.and.ellipse").font(.subheadline).foregroundStyle(ClubStyle.muted) }
+            }.padding(.vertical,8)
+            if let fetched = data.fetchedAt {
+                LabeledContent("competition_last_fetch",value:competitionTimestamp(fetched))
+            }
+            Text("competition_freshness_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+            Button { Task { await load() } } label: { Label("competition_refresh",systemImage:"arrow.clockwise") }.disabled(loading)
+            if CompetitionPolicy.manageable(language:languageCode,overview:data) && !editing {
+                Button { startEdit(data) } label: { Label("competition_change",systemImage:"slider.horizontal.3") }
+            }
+        }.listRowBackground(ClubStyle.card)
+    }
+    @ViewBuilder private func standings(_ data: CompetitionOverview, own: String) -> some View {
+        Section("competition_standings") {
+            ScrollView(.horizontal) {
+                VStack(spacing:0) {
+                    CompetitionStandingHeader()
+                    ForEach(data.table) { row in CompetitionStandingRow(row:row,own:row.id == own) }
+                }.frame(minWidth:690,alignment:.leading)
+            }.scrollIndicators(.visible)
+        }.listRowBackground(ClubStyle.card).listRowInsets(EdgeInsets(top:10,leading:12,bottom:10,trailing:12))
+    }
+    @ViewBuilder private func fixtures(_ title: String, rows: [CompetitionFixture], own: String, empty: String?) -> some View {
+        Section(title) {
+            if rows.isEmpty, let empty { Text(LocalizedStringKey(empty)).foregroundStyle(ClubStyle.muted) }
+            ForEach(rows) { match in CompetitionFixtureRow(match:match,own:own) }
+        }.listRowBackground(ClubStyle.card)
+    }
+    @ViewBuilder private func sources(_ data: CompetitionOverview) -> some View {
+        Section("competition_official_sources") {
+            if let source = data.source { Link(destination:source) { Label("competition_official_standings",systemImage:"trophy") }.frame(minHeight:44) }
+            if let source = data.teamSource { Link(destination:source) { Label("competition_official_team",systemImage:"person.3") }.frame(minHeight:44) }
+            Text("competition_source_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
+        }.listRowBackground(ClubStyle.card)
+    }
+    private func load() async {
+        guard !loading, scenePhase == .active, model.selectedTeam == team else { return }
+        loading = true; defer { loading = false }
+        do {
+            let result = try await model.loadCompetition(team:team,language:languageCode)
+            message = nil
+            if result.settings == nil && CompetitionPolicy.manageable(language:languageCode,overview:result) && !editing { startEdit(result) }
+        } catch is CancellationError { }
+        catch { message = competitionError(error) }
+    }
+    private func startEdit(_ data: CompetitionOverview) {
+        season = data.settings?.season ?? data.currentSeason
+        division = data.settings?.division ?? ""
+        dbmnTeam = data.settings?.teamId ?? ""
+        editing = true
+        Task { await loadOptions(preserveTeam:true) }
+    }
+    private func loadOptions(preserveTeam: Bool = false) async {
+        guard !season.isEmpty, languageCode == "nl", model.selectedTeam == team else { return }
+        optionsLoading = true; defer { optionsLoading = false }
+        do {
+            let result = try await model.competitionOptions(team:team,language:languageCode,season:season,division:division.isEmpty ? nil : division)
+            options = result
+            if division.isEmpty { division = result.divisions.first ?? "" }
+            if !preserveTeam || !result.teams.contains(where:{$0.id == dbmnTeam}) { dbmnTeam = "" }
+            message = nil
+        } catch is CancellationError { }
+        catch { message = competitionError(error) }
+    }
+    private func save(enabled: Bool) async {
+        guard !saving else { return }
+        saving = true; defer { saving = false }
+        do {
+            _ = try await model.saveCompetition(team:team,language:languageCode,enabled:enabled,season:season,division:division,teamID:dbmnTeam)
+            editing = false; message = nil
+        } catch is CancellationError { }
+        catch { message = competitionError(error) }
+    }
+}
+
+private struct CompetitionStandingHeader: View {
+    var body: some View {
+        HStack(spacing:8) {
+            Text("#").frame(width:28)
+            Text("competition_team").frame(width:190,alignment:.leading)
+            Text("competition_played_short").frame(width:54)
+            Text("competition_won_short").frame(width:54)
+            Text("competition_lost_short").frame(width:54)
+            Text("competition_points_short").frame(width:62)
+            Text("competition_average_short").frame(width:62)
+            Text("competition_penalty_short").frame(width:62)
+        }.font(.caption.bold()).foregroundStyle(ClubStyle.muted).padding(.vertical,8)
+    }
+}
+private struct CompetitionStandingRow: View {
+    let row: CompetitionStanding
+    let own: Bool
+    var body: some View {
+        HStack(spacing:8) {
+            Text("\(row.position)").font(ClubStyle.numberFont(20)).foregroundStyle(own ? ClubStyle.ink : ClubStyle.lime).frame(width:28)
+            VStack(alignment:.leading,spacing:2) { Text(row.name).font(.subheadline.bold()); if own { Text("competition_own_team").font(.caption2.bold()) } }.frame(width:190,alignment:.leading)
+            Text("\(row.played)").frame(width:54)
+            Text("\(row.won)").frame(width:54)
+            Text("\(row.lost)").frame(width:54)
+            Text(row.points).bold().frame(width:62)
+            Text(row.average).frame(width:62)
+            Text(row.penalty.isEmpty ? "—" : row.penalty).frame(width:62)
+        }.monospacedDigit().padding(.vertical,9).padding(.horizontal,6)
+            .foregroundStyle(own ? ClubStyle.ink : ClubStyle.text)
+            .background(own ? ClubStyle.lime : Color.clear,in:RoundedRectangle(cornerRadius:10))
+            .accessibilityElement(children:.combine)
+    }
+}
+private struct CompetitionFixtureRow: View {
+    let match: CompetitionFixture
+    let own: String
+    var body: some View {
+        VStack(alignment:.leading,spacing:8) {
+            HStack { Text(competitionDate(match.date)).font(.caption.bold()).foregroundStyle(ClubStyle.lime); Spacer(); Text(LocalizedStringKey(match.homeId == own ? "competition_home" : "competition_away")).font(.caption).foregroundStyle(ClubStyle.muted) }
+            HStack(alignment:.firstTextBaseline) {
+                Text("\(match.home) – \(match.away)").font(.headline)
+                Spacer()
+                if let score = match.score { Text(score).font(ClubStyle.numberFont(24)).foregroundStyle(ClubStyle.lime) }
+                else { Text("competition_waiting_result").font(.caption).foregroundStyle(ClubStyle.muted) }
+            }
+        }.padding(.vertical,7).accessibilityElement(children:.combine)
+    }
+}
+private func competitionTimestamp(_ timestamp: TimeInterval) -> String {
+    let formatter = DateFormatter(); formatter.locale = AppLanguage.locale; formatter.timeZone = TimeZone(identifier:"Europe/Amsterdam"); formatter.dateStyle = .medium; formatter.timeStyle = .short
+    return formatter.string(from:Date(timeIntervalSince1970:timestamp))
+}
+private func competitionDate(_ raw: String) -> String {
+    let parser = DateFormatter(); parser.locale = Locale(identifier:"en_US_POSIX"); parser.timeZone = TimeZone(identifier:"Europe/Amsterdam"); parser.dateFormat = "yyyy-MM-dd"
+    guard let date = parser.date(from:raw) else { return raw }
+    let formatter = DateFormatter(); formatter.locale = AppLanguage.locale; formatter.timeZone = parser.timeZone; formatter.dateStyle = .medium
+    return formatter.string(from:date)
+}
+private func competitionError(_ error: Error) -> String {
+    switch (error as? APIError)?.status {
+    case 403: return tr("competition_read_only")
+    case 422: return tr("competition_invalid_selection")
+    case 429: return tr("competition_rate_limit")
+    case 503: return tr("competition_source_error")
+    default: return tr("competition_load_failed")
+    }
 }
 
 struct NativeEventView: View {

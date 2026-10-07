@@ -11,6 +11,7 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
     @Published var selectedTeam: Int = 0
     @Published var evenings: [Evening] = []
     @Published var teamPlayers: [PlatformPlayer] = []
+    @Published var competition: CompetitionOverview?
     @Published var online = true
     @Published var syncing = false
     @Published var issue: String?
@@ -164,12 +165,39 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
         evenings = snapshot.evenings; teamPlayers = snapshot.players
         return snapshot
     }
-    func accountRequest(_ path: String, body: [String:Any]? = nil, team: Int? = nil) async throws -> Data {
+    func accountRequest(_ path: String, query: [URLQueryItem] = [], body: [String:Any]? = nil, team: Int? = nil) async throws -> Data {
         guard online, let current = session else { throw APIError(status:0) }
-        let data = try await MobileAPI(base:current.base,token:current.token,team:team).request(path,body:body.map { try JSONSerialization.data(withJSONObject:$0) })
+        let data = try await MobileAPI(base:current.base,token:current.token,team:team).request(path,query:query,body:body.map { try JSONSerialization.data(withJSONObject:$0) })
         guard session?.token == current.token else { throw CancellationError() }
         return data
     }
+    @discardableResult func loadCompetition(team: Int, language: String) async throws -> CompetitionOverview {
+        let data = try await accountRequest("competition",query:[URLQueryItem(name:"locale",value:language)],team:team)
+        guard selectedTeam == team else { throw CancellationError() }
+        let result = try JSONDecoder().decode(CompetitionOverview.self,from:data)
+        competition = result
+        return result
+    }
+    func competitionOptions(team: Int, language: String, season: String, division: String?) async throws -> CompetitionOptions {
+        var query = [URLQueryItem(name:"locale",value:language),URLQueryItem(name:"season",value:season)]
+        if let division, !division.isEmpty { query.append(URLQueryItem(name:"division",value:division)) }
+        let data = try await accountRequest("competition/options",query:query,team:team)
+        guard selectedTeam == team else { throw CancellationError() }
+        return try JSONDecoder().decode(CompetitionOptions.self,from:data)
+    }
+    @discardableResult func saveCompetition(team: Int, language: String, enabled: Bool, season: String? = nil, division: String? = nil, teamID: String? = nil) async throws -> CompetitionOverview {
+        var body: [String:Any] = ["locale":language,"enabled":enabled]
+        if enabled {
+            guard let season, let division, let teamID, !season.isEmpty, !division.isEmpty, !teamID.isEmpty else { throw APIError(status:422) }
+            body["season"] = season; body["division"] = division; body["teamId"] = teamID
+        }
+        let data = try await accountRequest("competition",body:body,team:team)
+        guard selectedTeam == team else { throw CancellationError() }
+        let result = try JSONDecoder().decode(CompetitionOverview.self,from:data)
+        competition = result
+        return result
+    }
+    func clearCompetition() { competition = nil }
     func confirmPurchase(_ result: VerificationResult<StoreKit.Transaction>, team: Int) async throws {
         guard case .verified(let transaction) = result else { throw APIError(status:422) }
         struct Reply: Decodable { let verified: Bool }
@@ -192,7 +220,7 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
         guard let current = session else { return }
         // Retain every local game and queued event, even if revocation cannot reach the server.
         do { try Vault.delete("session") } catch { issue = "storage_error"; return }
-        session = nil; loggedIn = false; account = nil; evenings = []; teamPlayers = []; selectedTeam = 0
+        session = nil; loggedIn = false; account = nil; evenings = []; teamPlayers = []; competition = nil; selectedTeam = 0
         _ = try? await MobileAPI(base:current.base,token:current.token).request("logout",body:Data("{\"revoke\":true}".utf8))
     }
     func refresh(force: Bool = false) async {
