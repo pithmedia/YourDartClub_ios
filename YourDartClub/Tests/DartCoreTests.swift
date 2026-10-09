@@ -2,6 +2,130 @@ import XCTest
 import SQLite3
 @testable import DartCore
 final class DartCoreTests: XCTestCase {
+    private func finishedMatch(players: [String] = ["Hans", "Joris"], starter: String = "A") throws -> LocalGame {
+        var game = LocalGame(config:.init(players:players,game:301,checkout:"double",bestOf:1,starter:starter))
+        game.events.append(.init(score:180))
+        for _ in 1..<players.count { game.events.append(.init(score:60)) }
+        game.events.append(.init(score:121,darts:3,finish:true))
+        XCTAssertNotNil(try DartRules.replay(game).winner)
+        return game
+    }
+    func testPracticalCheckoutChartAndRemainingDarts() {
+        let routes: [Int:String] = [35:"S3 · D16",50:"S10 · D20",63:"T17 · D6",68:"T16 · D10",76:"T16 · D14",82:"T14 · D20",101:"T20 · S9 · D16",104:"T18 · S18 · D16",110:"T20 · S10 · D20",129:"T19 · T12 · D18",132:"25 · T19 · Bull",161:"T20 · T17 · Bull"]
+        for (score,route) in routes { XCTAssertEqual(DartRules.advice(score,mode:"double"),route) }
+        XCTAssertEqual(DartRules.advice(50,mode:"double",darts:1),"Bull")
+        XCTAssertEqual(DartRules.advice(110,mode:"double",darts:2),"T20 · Bull")
+        XCTAssertEqual(DartRules.advice(104,mode:"double",darts:2),"T18 · Bull")
+        XCTAssertNil(DartRules.advice(132,mode:"double",darts:2))
+    }
+    func testEveryCheckoutRouteHasCorrectTotalFinalDoubleAndDartCount() {
+        for mode in ["double","single"] { for score in 1...180 { for darts in 1...3 {
+            guard let route = DartRules.advice(score,mode:mode,darts:darts) else { continue }
+            let targets = route.components(separatedBy:" · ")
+            XCTAssertLessThanOrEqual(targets.count,darts)
+            var rest = score
+            for (index,target) in targets.enumerated() {
+                var value = 0
+                if target == "Bull" { value = 50 }
+                else if target == "25" { value = 25 }
+                else {
+                    XCTAssertNotNil(target.range(of:"^[STD]([1-9]|1[0-9]|20)$",options:.regularExpression))
+                    value = (Int(target.dropFirst()) ?? 0) * (target.first == "T" ? 3 : target.first == "D" ? 2 : 1)
+                }
+                rest -= value
+                if index < targets.count - 1 { XCTAssertGreaterThanOrEqual(rest,mode == "double" ? 2 : 1) }
+            }
+            XCTAssertEqual(rest,0,"\(score): \(route)")
+            if mode == "double" { XCTAssertTrue(targets.last?.hasPrefix("D") == true || targets.last == "Bull") }
+        } } }
+        let bogeys = Set([159,162,163,165,166,168,169])
+        for score in 2...170 { XCTAssertEqual(DartRules.advice(score,mode:"double") == nil,bogeys.contains(score)) }
+    }
+    func testRematchPersistsOriginalAndEmptySuccessorAcrossRestart() throws {
+        let source = try finishedMatch(starter:"B")
+        let original = try JSONEncoder().encode(source)
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).path
+        defer { for suffix in ["","-wal","-shm"] { try? FileManager.default.removeItem(atPath:path+suffix) } }
+        var nextID = ""
+        do {
+            let db = try GameDatabase(path:path); try db.save(source)
+            let next = try db.rematch(source.id)
+            nextID = next.id
+            XCTAssertNotEqual(next.id,source.id)
+            XCTAssertEqual(next.rematchOf,source.id)
+            XCTAssertEqual(next.config.players,source.config.players)
+            XCTAssertEqual(next.config.game,301); XCTAssertEqual(next.config.checkout,"double"); XCTAssertEqual(next.config.bestOf,1)
+            XCTAssertEqual(next.config.starter,"A")
+            XCTAssertTrue(next.events.isEmpty); XCTAssertFalse(next.uploadRequested)
+            XCTAssertNil(next.teamID); XCTAssertNil(next.userID); XCTAssertNil(next.serverOrigin); XCTAssertNil(next.serverConfirmed)
+            XCTAssertEqual(next.acknowledged,0)
+            let state = try DartRules.replay(next)
+            XCTAssertEqual(state.remaining,[301,301]); XCTAssertEqual(state.legs,[0,0]); XCTAssertEqual(state.points,[0,0]); XCTAssertEqual(state.dartsThrown,[0,0]); XCTAssertNil(state.winner)
+        }
+        let db = try GameDatabase(path:path)
+        let games = try db.load()
+        XCTAssertEqual(games.count,2); XCTAssertTrue(games.contains { $0.id == nextID })
+        let restored = try XCTUnwrap(games.first { $0.id == source.id })
+        XCTAssertEqual(restored.events,source.events); XCTAssertEqual(restored.config,source.config)
+        XCTAssertEqual(try DartRules.replay(restored),try DartRules.replay(source))
+        XCTAssertEqual(try JSONDecoder().decode(LocalGame.self,from:original).events,restored.events)
+        XCTAssertEqual(try db.rematch(source.id,starter:1).id,nextID)
+        XCTAssertEqual(try db.load().count,2)
+    }
+    func testRepeatedRematchTapsAndStarterOverrideDoNotCreateOrRewriteGames() throws {
+        let db = try GameDatabase(path:":memory:")
+        let source = try finishedMatch(players:["One","Two","Three","Four"],starter:"D")
+        try db.save(source)
+        var next = try db.rematch(source.id,starter:2)
+        for _ in 0..<20 { XCTAssertEqual(try db.rematch(source.id,starter:1).id,next.id) }
+        XCTAssertEqual(try db.load().count,2)
+        XCTAssertEqual(next.config.starter,"C")
+        try next.changeStarter(to:3); try db.save(next)
+        next.events.append(.init(score:60)); try db.save(next)
+        XCTAssertThrowsError(try next.changeStarter(to:0))
+        XCTAssertEqual(try db.rematch(source.id,starter:0).config.starter,"D")
+        XCTAssertEqual(try db.load().first { $0.id == source.id }?.config.starter,"D")
+    }
+    func testSoloRematchAndMultiplayerDefaultRotateFromMatchStarter() throws {
+        let solo = try finishedMatch(players:["Solo"])
+        let soloNext = try solo.rematch()
+        XCTAssertEqual(soloNext.config.starter,"A"); XCTAssertFalse(soloNext.canChangeStarter)
+        for (starter,expected) in [("A","B"),("B","C"),("C","A")] {
+            let source = try finishedMatch(players:["One","Two","Three"],starter:starter)
+            XCTAssertEqual(try source.rematch().config.starter,expected)
+        }
+    }
+    func testRematchRequiresFullWinAndRejectsUploadBoundSource() throws {
+        let db = try GameDatabase(path:":memory:")
+        var source = try finishedMatch()
+        source.config.bestOf = 3 // One leg is not a full match.
+        try db.save(source)
+        XCTAssertThrowsError(try db.rematch(source.id))
+        source.config.bestOf = 1; source.uploadRequested = true; try db.save(source)
+        XCTAssertThrowsError(try db.rematch(source.id))
+        source.uploadRequested = false; source.teamID = 9; try db.save(source)
+        XCTAssertThrowsError(try db.rematch(source.id))
+        source.teamID = nil; try db.save(source)
+        XCTAssertThrowsError(try db.rematch(source.id,starter:4))
+        XCTAssertEqual(try db.load().count,1)
+        XCTAssertNoThrow(try db.rematch(source.id)) // Failed transactions released their lock.
+    }
+    func testCheckoutUndoReopensMatchWithoutRewritingStarterOrOldRematch() throws {
+        let db = try GameDatabase(path:":memory:")
+        var source = try finishedMatch()
+        try db.save(source)
+        let next = try db.rematch(source.id)
+        let checkout = try XCTUnwrap(source.events.last)
+        source.events.append(.undo(checkout.id)); try db.save(source)
+        XCTAssertNil(try DartRules.replay(source).winner)
+        XCTAssertFalse(source.canChangeStarter); XCTAssertFalse(source.canRematch)
+        XCTAssertThrowsError(try db.rematch(source.id))
+        source.events.append(.init(score:121,darts:3,finish:true)); try db.save(source)
+        XCTAssertEqual(try db.rematch(source.id).id,next.id)
+        XCTAssertEqual(try db.load().count,2)
+        XCTAssertEqual(source.config.starter,"A")
+    }
+
     func testStarterSwitchPersistsAndControlsFirstTurn() throws {
         var game = LocalGame(config:.init(players:["Hans","Joris","Sam"],game:301))
         try game.changeStarter(to:2)

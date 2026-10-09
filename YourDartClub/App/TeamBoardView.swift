@@ -103,13 +103,23 @@ struct TeamBoardView: View {
     @State private var darts = 3
     @State private var checkout = false
     @State private var cast = false
+    @State private var autodartsDestination: PlatformDestination?
     init(eventID: String,board: Int,team: Int) { _counter = StateObject(wrappedValue:BoardCounter(eventID:eventID,board:board,team:team)) }
     var body: some View {
         GeometryReader { geo in
             if let event = counter.event {
                 let wide = geo.size.width > geo.size.height * 1.15
                 let layout = wide ? AnyLayout(HStackLayout(spacing:10)) : AnyLayout(VStackLayout(spacing:8))
-                layout {
+                if let match = counter.match, let winner = match.counter?.state.pendingWinner {
+                    ScrollView {
+                        VStack(spacing:20) {
+                            MatchResultSummary(names:[model.playerName(match.a),model.playerName(match.b)],
+                                legs:[match.legsA,match.legsB],averages:[average(match.counter?.state.pointsA,match.counter?.state.dartsA),average(match.counter?.state.pointsB,match.counter?.state.dartsB)],winner:winner == "A" ? 0 : 1)
+                            Text("official_result_pending").foregroundStyle(ClubStyle.muted).multilineTextAlignment(.center)
+                            controls(match,event)
+                        }.frame(maxWidth:640).frame(maxWidth:.infinity).padding(20)
+                    }.background(ClubBackdrop())
+                } else { layout {
                     VStack(spacing:8) {
                         HStack { Label("\(tr("board")) \(counter.board)",systemImage:"target"); Spacer(); Text("\(event.game) · \(tr(event.checkout))") }.font(.caption).foregroundStyle(ClubStyle.muted)
                         if let match = counter.match {
@@ -123,6 +133,7 @@ struct TeamBoardView: View {
                         controls(match,event).frame(maxWidth:.infinity).frame(height:wide ? geo.size.height - 16 : min(410,geo.size.height * 0.57))
                     }
                 }.padding(8).background(ClubBackdrop())
+                }
             } else { ProgressView().frame(maxWidth:.infinity,maxHeight:.infinity) }
         }.navigationTitle("").navigationBarTitleDisplayMode(.inline).toolbar(.visible,for:.navigationBar).toolbar(.hidden,for:.tabBar)
             .safeAreaInset(edge:.bottom,spacing:0) {
@@ -136,6 +147,7 @@ struct TeamBoardView: View {
                 }
             }
             .toolbar { ToolbarItem(placement:.topBarTrailing) { Button { cast = true } label: { Image(systemName:"tv") }.accessibilityLabel(Text("tv_board")) } }
+            .sheet(item:$autodartsDestination) { TeamPlatformView(destination:$0) }
             .sheet(isPresented:$cast) { CastOptionsView(target:.board(team:counter.team,event:counter.eventID,board:counter.board)).environmentObject(model) }
             .task {
                 UIApplication.shared.isIdleTimerDisabled = true
@@ -149,6 +161,10 @@ struct TeamBoardView: View {
             .onChange(of:counter.match?.id) { _,_ in input = ""; darts = 3 }
             .onChange(of:counter.acknowledgedVisit) { _,_ in input = ""; darts = 3 }
             .alert(counter.event?.checkout == "double" ? "double_confirm" : "finish_confirm",isPresented:$checkout) { Button("cancel",role:.cancel) {}; Button("save_score") { submit(confirmed:true) } }
+    }
+    private func average(_ points: Int?, _ darts: Int?) -> Double? {
+        guard let points, let darts, darts > 0 else { return nil }
+        return Double(points) * 3 / Double(darts)
     }
     private func playerCard(_ match: PlatformMatch,_ event: Evening,side: String) -> some View {
         let active = (match.counter?.state.turn ?? "A") == side
@@ -172,6 +188,8 @@ struct TeamBoardView: View {
         }.padding(10).background(active ? ClubStyle.lime.opacity(0.10) : ClubStyle.card,in:RoundedRectangle(cornerRadius:18)).overlay(RoundedRectangle(cornerRadius:18).stroke(active ? ClubStyle.lime : ClubStyle.border))
     }
     @ViewBuilder private func controls(_ match: PlatformMatch,_ event: Evening) -> some View {
+        Button { Task { await counter.stop(); autodartsDestination = model.platformDestination(event:event.id,autodarts:match.id) } } label: { Label("autodarts_remote",systemImage:"target") }.buttonStyle(ClubButton(primary:false)).disabled(counter.busy || !counter.ready)
+
         if !counter.controlling || match.counter == nil {
             VStack(spacing:16) {
                 Text("board_control_notice").font(.subheadline).foregroundStyle(ClubStyle.muted)
@@ -185,7 +203,7 @@ struct TeamBoardView: View {
             VStack(spacing:16) {
                 Text("match_finished").font(.headline)
                 Button { Task { await counter.action("counter-finish") } } label: { Label("finish_next_board",systemImage:"checkmark.circle") }.buttonStyle(ClubButton(primary:true))
-                Button("undo") { Task { await counter.action("counter-undo") } }
+                Button { Task { await counter.action("counter-undo") } } label: { Label("correct_result",systemImage:"arrow.uturn.backward").frame(minHeight:44) }
             }.disabled(counter.busy || !counter.ready)
         } else {
             VStack(spacing:6) {

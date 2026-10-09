@@ -94,6 +94,14 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
         let game = LocalGame(config:config)
         do { try save(game); return game.id } catch { issue = "storage_error"; return nil }
     }
+    func rematch(_ id: String, starter: Int) -> String? {
+        guard let database, !fatalStorage else { issue = "storage_error"; return nil }
+        do {
+            let game = try database.rematch(id,starter:starter)
+            games = try database.load()
+            return game.id
+        } catch { issue = "storage_error"; return nil }
+    }
     @discardableResult func append(_ event: ScoreEvent, to id: String) -> Bool {
         guard var g = games.first(where:{$0.id == id}) else { return false }
         g.events.append(event)
@@ -136,8 +144,10 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
             return false
         }
     }
-    func platformDestination(event: String? = nil, create: Bool = false, tv: Bool = false) -> PlatformDestination? {
-        guard online, let session, account?.teams.contains(where:{$0.id == selectedTeam && $0.active}) == true else {
+    var agendaCacheScope: String { session.map { AgendaCache.scope($0) } ?? "" }
+    var savedAgendas: [SavedAgenda] { session.map { AgendaCache.all(scope:AgendaCache.scope($0)) } ?? [] }
+    func platformDestination(event: String? = nil, create: Bool = false, tv: Bool = false, autodarts: String? = nil, agenda: Bool = false) -> PlatformDestination? {
+        guard let session, (online || agenda), (account?.teams.contains(where:{$0.id == selectedTeam && $0.active}) == true || agenda && AgendaCache.read(scope:AgendaCache.scope(session),team:selectedTeam) != nil) else {
             issue = online ? "login_required" : "platform_online_required"; return nil
         }
         var request = URLRequest(url:session.base.appendingPathComponent("mobile/team"))
@@ -147,9 +157,17 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
         request.setValue("application/json",forHTTPHeaderField:"Content-Type")
         request.setValue("text/html",forHTTPHeaderField:"Accept")
         var body: [String:Any] = ["locale":AppLanguage.code,"create":create,"destination":tv ? "tv" : "team"]
+        if agenda {
+            body["destination"] = "agenda"
+            let key = "agendaDevice"
+            let device = UserDefaults.standard.string(forKey:key) ?? UUID().uuidString
+            UserDefaults.standard.set(device,forKey:key)
+            body["agendaDevice"] = device
+        }
         if let event { body["event"] = event }
+        if let autodarts { body["autodarts"] = autodarts }
         request.httpBody = try? JSONSerialization.data(withJSONObject:body)
-        return PlatformDestination(request:request,team:selectedTeam)
+        return PlatformDestination(request:request,team:selectedTeam,agenda:agenda,cacheScope:AgendaCache.scope(session),teamName:account?.teams.first(where:{$0.id == selectedTeam})?.name ?? AgendaCache.read(scope:AgendaCache.scope(session),team:selectedTeam)?.name ?? "")
     }
     func platformRequest(_ path: String, body: [String:Any]? = nil, team: Int) async throws -> Data {
         while platformRequestRunning { try await Task.sleep(for:.milliseconds(50)) }
@@ -220,6 +238,7 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
         guard let current = session else { return }
         // Retain every local game and queued event, even if revocation cannot reach the server.
         do { try Vault.delete("session") } catch { issue = "storage_error"; return }
+        AgendaCache.clear()
         session = nil; loggedIn = false; account = nil; evenings = []; teamPlayers = []; competition = nil; selectedTeam = 0
         _ = try? await MobileAPI(base:current.base,token:current.token).request("logout",body:Data("{\"revoke\":true}".utf8))
     }
@@ -231,6 +250,7 @@ struct Session: Codable { let base: URL; let token: String; let userID: Int }
             let me = try JSONDecoder().decode(Account.self,from: await api.request("me"))
             guard session?.token == current.token else { return }
             if account == nil && !UserDefaults.standard.bool(forKey:"quickCustomized") { quick = me.quickScoreAutoSubmit; UserDefaults.standard.set(quick,forKey:"quick") }; account = me
+            AgendaCache.prune(scope:AgendaCache.scope(current),teams:me.teams.filter(\.active).map(\.id))
             for await result in Transaction.unfinished { await recoverPurchase(result) }
             if !me.teams.contains(where:{$0.id == selectedTeam}) { selectedTeam = me.teams.first?.id ?? 0 }
             for original in games where original.uploadRequested && original.userID == current.userID && original.serverOrigin == current.base.absoluteString && original.syncProblem == nil {

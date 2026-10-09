@@ -4,22 +4,35 @@ struct TeamView: View {
     @EnvironmentObject var model: AppModel
     @AppStorage(AppLanguage.preference) private var language = ""
     @State private var create = false
+    @State private var agendaDestination: PlatformDestination?
     var body: some View {
         NavigationStack {
             List {
+                if model.loggedIn && (!model.online || model.account == nil) && !model.savedAgendas.isEmpty {
+                    Section("team_agenda") {
+                        ForEach(model.savedAgendas) { agenda in
+                            Button { model.selectedTeam = agenda.team; agendaDestination = model.platformDestination(agenda:true) } label: {
+                                Label(agenda.name,systemImage:"calendar")
+                            }
+                        }
+                    }.listRowBackground(ClubStyle.card)
+                }
                 if model.loggedIn {
                     Section {
                         Picker("team",selection:$model.selectedTeam) { ForEach(model.account?.teams ?? []) { Text($0.name).tag($0.id) } }
                         Button { create = true } label: { Label("create_event",systemImage:"plus.circle.fill") }.buttonStyle(ClubButton(primary:true)).disabled(!active)
                     }.listRowBackground(ClubStyle.card)
                     Section {
-                        NavigationLink { TeamStatisticsView(team:model.selectedTeam) } label: { Label("team_statistics",systemImage:"chart.bar.xaxis") }
-                        NavigationLink { TeamHistoryView(team:model.selectedTeam) } label: { Label("team_history",systemImage:"clock.arrow.circlepath") }
-                        NavigationLink { TeamParticipantsView(team:model.selectedTeam) } label: { Label("team_participants",systemImage:"person.3") }
+                        Button { agendaDestination = model.platformDestination(agenda:true) } label: {
+                            Label { Text("team_agenda").foregroundStyle(ClubStyle.text) } icon: { Image(systemName:"calendar").foregroundStyle(ClubStyle.lime) }
+                        }.disabled(!teamActive && !model.savedAgendas.contains(where:{$0.team == model.selectedTeam}))
+                        NavigationLink { TeamStatisticsView(team:model.selectedTeam) } label: { Label { Text("team_statistics").foregroundStyle(ClubStyle.text) } icon: { Image(systemName:"chart.bar.xaxis").foregroundStyle(ClubStyle.lime) } }
+                        NavigationLink { TeamHistoryView(team:model.selectedTeam) } label: { Label { Text("team_history").foregroundStyle(ClubStyle.text) } icon: { Image(systemName:"clock.arrow.circlepath").foregroundStyle(ClubStyle.lime) } }
+                        NavigationLink { TeamParticipantsView(team:model.selectedTeam) } label: { Label { Text("team_participants").foregroundStyle(ClubStyle.text) } icon: { Image(systemName:"person.3").foregroundStyle(ClubStyle.lime) } }
                         if teamActive && CompetitionPolicy.visible(language:languageCode,overview:model.competition) {
                             NavigationLink { CompetitionView(team:model.selectedTeam) } label: {
                                 VStack(alignment:.leading,spacing:4) {
-                                    Label("competition_title",systemImage:"trophy")
+                                    Label { Text("competition_title").foregroundStyle(ClubStyle.text) } icon: { Image(systemName:"trophy").foregroundStyle(ClubStyle.lime) }
                                     if let name = model.competition?.settings?.name { Text(name).font(.caption).foregroundStyle(ClubStyle.muted) }
                                 }
                             }
@@ -43,6 +56,9 @@ struct TeamView: View {
                 .onChange(of:model.selectedTeam) { _,_ in model.evenings = []; model.teamPlayers = []; model.clearCompetition(); Task { await model.refresh(force:true); await loadCompetition() } }
                 .task(id:"\(model.selectedTeam)-\(languageCode)") { await loadCompetition() }
                 .sheet(isPresented:$create) { CreateEventView(team:model.selectedTeam) }
+                .navigationDestination(isPresented:Binding(get:{ agendaDestination != nil },set:{ if !$0 { agendaDestination = nil } })) {
+                    if let destination = agendaDestination { TeamPlatformView(destination:destination) }
+                }
         }
     }
     private var languageCode: String { AppLanguage.supported.contains(language) ? language : AppLanguage.code }
@@ -65,6 +81,7 @@ struct CompetitionView: View {
     @State private var saving = false
     @State private var editing = false
     @State private var unlinking = false
+    @State private var showingFreshness = false
     @State private var message: String?
     @State private var season = ""
     @State private var division = ""
@@ -86,7 +103,6 @@ struct CompetitionView: View {
                         }
                         if data.unavailable != true {
                             standings(data,own:linked.teamId)
-                            fixtures("competition_schedule",rows:data.schedule,own:linked.teamId,empty:"competition_schedule_empty")
                             if !data.results.isEmpty { fixtures("competition_results",rows:data.results,own:linked.teamId,empty:nil) }
                         }
                         sources(data)
@@ -152,19 +168,45 @@ struct CompetitionView: View {
     }
     @ViewBuilder private func summary(_ linked: CompetitionSettings, data: CompetitionOverview) -> some View {
         Section {
-            VStack(alignment:.leading,spacing:8) {
-                Text("DBMN · \(linked.season) · \(tr("competition_division")) \(linked.division)").font(.caption.bold()).foregroundStyle(ClubStyle.lime)
-                Text(linked.name).font(.title2.bold())
-                if !linked.venue.isEmpty { Label(linked.venue,systemImage:"mappin.and.ellipse").font(.subheadline).foregroundStyle(ClubStyle.muted) }
-            }.padding(.vertical,8)
-            if let fetched = data.fetchedAt {
-                LabeledContent("competition_last_fetch",value:competitionTimestamp(fetched))
+            VStack(alignment:.leading,spacing:6) {
+                HStack(alignment:.top,spacing:12) {
+                    VStack(alignment:.leading,spacing:4) {
+                        Text("DBMN · \(linked.season) · \(tr("competition_division")) \(linked.division)")
+                            .font(.caption.bold()).foregroundStyle(ClubStyle.lime)
+                        Text(linked.name).font(.headline)
+                        if !linked.venue.isEmpty {
+                            Label(linked.venue,systemImage:"mappin.and.ellipse")
+                                .font(.caption).foregroundStyle(ClubStyle.muted)
+                        }
+                    }.frame(maxWidth:.infinity,alignment:.leading)
+                    Button { Task { await load() } } label: {
+                        Image(systemName:"arrow.clockwise").frame(width:44,height:44)
+                    }.buttonStyle(.borderless).disabled(loading)
+                        .accessibilityLabel(Text("competition_refresh"))
+                }
+                HStack(spacing:8) {
+                    Button { showingFreshness = true } label: {
+                        HStack(spacing:6) {
+                            Image(systemName:"info.circle")
+                            if let fetched = data.fetchedAt { Text(competitionTimestamp(fetched)) }
+                            else { Text("competition_last_fetch") }
+                        }.font(.caption).foregroundStyle(ClubStyle.muted)
+                            .frame(minHeight:44,alignment:.leading)
+                    }.buttonStyle(.borderless)
+                        .accessibilityLabel(Text("competition_last_fetch"))
+                        .accessibilityValue(Text(data.fetchedAt.map(competitionTimestamp) ?? "—"))
+                    Spacer(minLength:0)
+                    if CompetitionPolicy.manageable(language:languageCode,overview:data) && !editing {
+                        Button { startEdit(data) } label: {
+                            Image(systemName:"slider.horizontal.3").frame(width:44,height:44)
+                        }.buttonStyle(.borderless).accessibilityLabel(Text("competition_change"))
+                    }
+                }
             }
-            Text("competition_freshness_notice").font(.footnote).foregroundStyle(ClubStyle.muted)
-            Button { Task { await load() } } label: { Label("competition_refresh",systemImage:"arrow.clockwise") }.disabled(loading)
-            if CompetitionPolicy.manageable(language:languageCode,overview:data) && !editing {
-                Button { startEdit(data) } label: { Label("competition_change",systemImage:"slider.horizontal.3") }
-            }
+            .alert("competition_last_fetch",isPresented:$showingFreshness) {
+                Button("close_details",role:.cancel) {}
+            } message: { Text("competition_freshness_notice") }
+
         }.listRowBackground(ClubStyle.card)
     }
     @ViewBuilder private func standings(_ data: CompetitionOverview, own: String) -> some View {
@@ -178,7 +220,7 @@ struct CompetitionView: View {
         }.listRowBackground(ClubStyle.card).listRowInsets(EdgeInsets(top:10,leading:12,bottom:10,trailing:12))
     }
     @ViewBuilder private func fixtures(_ title: String, rows: [CompetitionFixture], own: String, empty: String?) -> some View {
-        Section(title) {
+        Section(LocalizedStringKey(title)) {
             if rows.isEmpty, let empty { Text(LocalizedStringKey(empty)).foregroundStyle(ClubStyle.muted) }
             ForEach(rows) { match in CompetitionFixtureRow(match:match,own:own) }
         }.listRowBackground(ClubStyle.card)

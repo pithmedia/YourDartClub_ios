@@ -264,8 +264,8 @@ struct SubscriptionPriceDisplay {
     init(productID: String, amount: Decimal, currency: String, sandbox: Bool) {
         let reference: Decimal?
         switch productID {
-        case "com.yourdartclub.iphone.team.monthly": reference = 10
-        case "com.yourdartclub.iphone.team.yearly": reference = 100
+        case "com.yourdartclub.iphone.team.monthly": reference = Decimal(995) / 100
+        case "com.yourdartclub.iphone.team.yearly": reference = Decimal(8999) / 100
         default: reference = nil
         }
         if sandbox, currency == "USD", let reference {
@@ -277,5 +277,52 @@ struct SubscriptionPriceDisplay {
             self.currency = currency
             usesEuropeanReference = false
         }
+    }
+}
+
+/// External location links never load inside the authenticated app browser.
+enum PlatformExternalLinks {
+    static func isMaps(_ url: URL) -> Bool {
+        guard let parts = URLComponents(url:url,resolvingAgainstBaseURL:false),
+              parts.scheme == "https", parts.host == "www.google.com", parts.port == nil,
+              parts.user == nil, parts.password == nil, parts.percentEncodedPath == "/maps/search/", parts.fragment == nil,
+              let items = parts.queryItems, items.count == 2 else { return false }
+        let api = items.filter { $0.name == "api" }
+        let query = items.filter { $0.name == "query" }
+        return api.count == 1 && api[0].value == "1" && query.count == 1 && !(query[0].value ?? "").trimmingCharacters(in:.whitespacesAndNewlines).isEmpty
+    }
+}
+
+// The offline agenda deliberately contains no attendance, player identities or calendar tokens.
+struct AgendaFixture: Codable, Identifiable, Equatable {
+    let key: String
+    let date: String?
+    let dateLabel: String?
+    let time: String?
+    let kind: String?
+    let title: String?
+    let home: String?
+    let away: String?
+    let venue: String?
+    let venueAddress: String?
+    let score: String?
+    let status: String?
+    let cancelled: Bool?
+    var id: String { key }
+    var displayTitle: String { kind == "training" ? (title ?? "") : "\(home ?? "") – \(away ?? "")" }
+}
+struct AgendaPayload: Decodable {
+    let fixtures: [AgendaFixture]
+    let unavailable: Bool
+}
+struct SavedAgenda: Codable, Identifiable {
+    let team: Int
+    let name: String
+    let updatedAt: Date
+    let fixtures: [AgendaFixture]
+    var id: Int { team }
+    func upcoming(today: String) -> [AgendaFixture] {
+        fixtures.filter { ($0.score ?? "").isEmpty && $0.status != "no-result" && (($0.date ?? "").isEmpty || $0.date! >= today) }
+            .sorted { ((($0.date ?? "").isEmpty ? "9999" : $0.date!) + ($0.time ?? "")) < ((($1.date ?? "").isEmpty ? "9999" : $1.date!) + ($1.time ?? "")) }
     }
 }

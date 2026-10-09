@@ -2,6 +2,34 @@ import XCTest
 @testable import DartCore
 
 final class PlatformTests: XCTestCase {
+    func testVenueMapsLinksOpenExternallyWithEncodedNamesAndAddresses() throws {
+        XCTAssertTrue(PlatformExternalLinks.isMaps(try XCTUnwrap(URL(string:"https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Test%2C%20Markt%2012"))))
+        for value in ["https://evil.test/maps/search/?api=1&query=Test","http://www.google.com/maps/search/?api=1&query=Test","https://www.google.com@evil.test/maps/search/?api=1&query=Test","https://www.google.com/maps/search/?api=1&query=","https://www.google.com/maps/search/?api=1&query=Test&redirect=evil","https://www.google.com/maps/search/?api=1&query=Test&query=Other","https://www.google.com:444/maps/search/?api=1&query=Test","https://www.google.com/maps/search/?api=1&query=Test#other"] {
+            XCTAssertFalse(PlatformExternalLinks.isMaps(try XCTUnwrap(URL(string:value))),value)
+        }
+    }
+
+    func testOfflineAgendaRoundTripOmitsPrivateAttendanceAndKeepsSchedule() throws {
+        let data = Data("""
+        {"unavailable":false,"players":[{"id":"secret","name":"Private"}],"fixtures":[
+          {"key":"future","date":"2026-10-10","time":"20:00","home":"Club A","away":"Club B","venue":"Cafe","venueAddress":"Markt 1","responses":{"secret":"yes"}},
+          {"key":"old","date":"2026-10-08","home":"A","away":"B"},
+          {"key":"played","date":"2026-10-11","score":"5-3"},
+          {"key":"cancelled","date":"2026-10-12","kind":"training","title":"Training","cancelled":true},
+          {"key":"unknown","date":"","dateLabel":"TBC"}
+        ]}
+        """.utf8)
+        let payload = try JSONDecoder().decode(AgendaPayload.self,from:data)
+        let saved = SavedAgenda(team:42,name:"Team A",updatedAt:Date(),fixtures:payload.fixtures)
+        let encoded = try JSONEncoder().encode(saved)
+        let restored = try JSONDecoder().decode(SavedAgenda.self,from:encoded)
+        XCTAssertEqual(restored.upcoming(today:"2026-10-09").map(\.key),["future","cancelled","unknown"])
+        XCTAssertEqual(restored.fixtures.first?.venueAddress,"Markt 1")
+        XCTAssertEqual(restored.fixtures.first?.displayTitle,"Club A – Club B")
+        XCTAssertFalse(String(decoding:encoded,as:UTF8.self).contains("secret"))
+        XCTAssertFalse(String(decoding:encoded,as:UTF8.self).contains("responses"))
+    }
+
     private func snapshot(firstStatus: String = "live", nextStatus: String = "queued") throws -> PlatformSnapshot {
         let json = """
         {"players":[{"id":"a","name":"Alex"},{"id":"b","name":"Sam"}],"evenings":[{"id":"e","name":"Club","date":"2026-09-26","mode":"knockout","game":"501","checkout":"double","bestOf":3,"boards":2,"revision":7,"status":"active","players":["a","b"],"matches":[

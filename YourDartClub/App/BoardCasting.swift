@@ -39,7 +39,9 @@ enum CastTarget: Equatable {
     private var writer: String?
     private var pairedDisplay: (team: Int,id: String)?
     private var lastRemote = Date.distantPast
+    private var fetchingRemote = false
     private var channel: GCKCastChannel?
+    private weak var channelSession: GCKCastSession?
     private var sdkInitialized = false
     static var receiverID: String { Bundle.main.object(forInfoDictionaryKey:"GoogleCastReceiverID") as? String ?? "" }
     static var configured: Bool { receiverID.range(of:"^[A-Fa-f0-9]{8}$",options:.regularExpression) != nil }
@@ -51,6 +53,31 @@ enum CastTarget: Equatable {
         sdkInitialized = true
         GCKCastContext.sharedInstance().sessionManager.add(self)
     }
+    func discoverDevices() {
+        configure()
+        guard sdkInitialized else { return }
+        GCKCastContext.sharedInstance().discoveryManager.startDiscovery()
+    }
+    func applicationDidBecomeActive() {
+        guard sdkInitialized, target != nil else { return }
+        discoverDevices()
+        // The SDK resumes the session; also recover our channel if its callback was missed.
+        attach()
+        lastRemote = .distantPast
+        Task { [weak self] in await self?.refresh() }
+    }
+    #if DEBUG
+    func diagnoseDiscovery() async {
+        guard ProcessInfo.processInfo.arguments.contains("--cast-diagnostics") else { return }
+        GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        discoverDevices()
+        for _ in 0..<12 {
+            let manager = GCKCastContext.sharedInstance().discoveryManager
+            print("YDC_CAST discovery active=\(manager.discoveryActive) state=\(manager.discoveryState.rawValue) devices=\(manager.deviceCount)")
+            do { try await Task.sleep(for:.seconds(3)) } catch { return }
+        }
+    }
+    #endif
     func select(_ target: CastTarget,model: AppModel) {
         if self.target != target { writer = nil; tvPaired = false; frame = .idle }
         self.target = target; self.model = model; lastRemote = .distantPast
@@ -83,7 +110,14 @@ enum CastTarget: Equatable {
         case .board(let team,let id,let board):
             guard model.loggedIn, model.selectedTeam == team else { await stop(); return }
             do {
-                if fetchRemote && Date().timeIntervalSince(lastRemote) >= 6 { try await model.platformUpdate(team:team); lastRemote = Date() }
+                // Periodic refreshes recover missed updates even when no new visit is entered.
+                // Session-resume and foreground callbacks may overlap this timer.
+                if fetchRemote && !fetchingRemote && Date().timeIntervalSince(lastRemote) >= 2 {
+                    fetchingRemote = true
+                    defer { fetchingRemote = false }
+                    try await model.platformUpdate(team:team)
+                    lastRemote = Date()
+                }
                 guard target == selected else { return }
                 guard let e = model.evenings.first(where:{$0.id == id}) else { frame = .idle; break }
                 let match = e.live(on:board)
@@ -105,6 +139,7 @@ enum CastTarget: Equatable {
         }
         guard target == selected else { return }
         frame.stale = stale
+        ensureChannel()
         sendCast()
         if let writer {
             do { _ = try await MobileAPI(base:URL(string:"https://www.yourdartclub.com")!,token:writer).request("local-cast/frame",body:JSONSerialization.data(withJSONObject:["frame":try frameObject()])) }
@@ -146,14 +181,51 @@ enum CastTarget: Equatable {
     }
     func sessionManager(_ sessionManager: GCKSessionManager,didStart session: GCKSession) { attach() }
     func sessionManager(_ sessionManager: GCKSessionManager,didResumeSession session: GCKSession) { attach() }
-    func sessionManager(_ sessionManager: GCKSessionManager,didEnd session: GCKSession,withError error: Error?) { channel = nil; castConnected = false }
+    func sessionManager(_ sessionManager: GCKSessionManager,didSuspend session: GCKSession,with reason: GCKConnectionSuspendReason) {
+        // Retain the registered channel: the SDK reconnects it with this session.
+        castConnected = false
+    }
+    func sessionManager(_ sessionManager: GCKSessionManager,didEnd session: GCKSession,withError error: Error?) {
+        detachChannel()
+    }
+    private func detachChannel() {
+        if let channel, let channelSession { channelSession.remove(channel) }
+        channel = nil; channelSession = nil; castConnected = false
+    }
+    private func ensureChannel() {
+        guard sdkInitialized else { return }
+        let manager = GCKCastContext.sharedInstance().sessionManager
+        guard manager.hasConnectedCastSession(), let session = manager.currentCastSession else {
+            castConnected = false
+            return
+        }
+        // A resumed session already owns its channel. Registering a second channel for
+        // the same namespace can fail; never replace the working reference in that case.
+        if channelSession === session, channel != nil {
+            castConnected = channel?.isConnected == true
+            return
+        }
+        detachChannel()
+        let newChannel = GCKCastChannel(namespace:"urn:x-cast:com.yourdartclub.board")
+        guard session.add(newChannel) else { return }
+        channelSession = session; channel = newChannel
+        castConnected = newChannel.isConnected
+    }
     private func attach() {
-        guard let session = GCKCastContext.sharedInstance().sessionManager.currentCastSession else { return }
-        let channel = GCKCastChannel(namespace:"urn:x-cast:com.yourdartclub.board")
-        session.add(channel); self.channel = channel; castConnected = true; sendCast()
+        ensureChannel()
+        lastRemote = .distantPast
+        Task { [weak self] in await self?.refresh() }
     }
     private func sendCast() {
-        guard let channel,let data = try? JSONEncoder().encode(frame),let text = String(data:data,encoding:.utf8) else { return }
+        guard let channel, channel.isConnected, var payload = (try? frameObject()) as? [String:Any],
+              var players = payload["players"] as? [[String:Any]] else { return }
+        // Extend only the direct Cast frame; the authenticated TV relay keeps its existing schema.
+        for index in players.indices { players[index]["recent"] = Array(frame.players[index].recent.prefix(3)) }
+        payload["players"] = players
+        payload["recentLabel"] = tr("tv_recent_visits")
+        payload["waitingMessage"] = tr("cast_waiting_scores")
+        guard let data = try? JSONSerialization.data(withJSONObject:payload),
+              let text = String(data:data,encoding:.utf8) else { return }
         var error: GCKError?
         _ = channel.sendTextMessage(text,error:&error)
     }
@@ -203,6 +275,7 @@ struct ExternalBoardView: View {
     }
 }
 struct CastOptionsView: View {
+    @Environment(\.scenePhase) private var phase
     @EnvironmentObject var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var casting = BoardCasting.shared
@@ -258,7 +331,8 @@ struct CastOptionsView: View {
                     Button("cast_stop",role:.destructive) { Task { await casting.stop(); dismiss() } }.foregroundStyle(ClubStyle.danger)
                 }
             }.clubScreen().toolbar { ToolbarItem(placement:.confirmationAction) { Button("done") { dismiss() } } }
-                .task { casting.select(target,model:model) }
+                .task { casting.select(target,model:model); casting.discoverDevices() }
+                .onChange(of:phase) { _, value in if value == .active { casting.discoverDevices() } }
         }.tint(ClubStyle.lime).preferredColorScheme(.dark)
             .sheet(isPresented:$airplayHelp) {
                 NavigationStack {

@@ -1,41 +1,65 @@
 """Generate the dependency-free Xcode project; no XcodeGen/Ruby packages required."""
 from pathlib import Path
-import hashlib, json, plistlib, shutil
+import hashlib, json, plistlib, shutil, os
 root=Path(__file__).resolve().parent
 assets=root/'YourDartClub/Resources/Assets.xcassets'
 for folder in [assets,assets/'AppIcon.appiconset',assets/'Brand.imageset']: folder.mkdir(parents=True,exist_ok=True)
-shutil.copyfile(root.parent/'public_html/images/yourdartclub-app-icon-1024.png',assets/'AppIcon.appiconset/Icon.png')
-shutil.copyfile(root.parent/'public_html/images/yourdartclub-app-icon-1024.png',assets/'Brand.imageset/Brand.png')
+shutil.copyfile(root/'Artwork/appicon-yourdartclub-1024.png',assets/'AppIcon.appiconset/Icon.png')
+shutil.copyfile(root/'Artwork/appicon-yourdartclub-1024.png',assets/'Brand.imageset/Brand.png')
 (assets/'Wordmark.imageset').mkdir(exist_ok=True)
-shutil.copyfile(root.parent/'public_html/images/yourdartclub-logo.png',assets/'Wordmark.imageset/Wordmark.png')
-(assets/'Wordmark.imageset/Contents.json').write_text(json.dumps({'images':[{'filename':'Wordmark.png','idiom':'universal'}],'info':{'author':'xcode','version':1}}))
+shutil.copyfile(root.parent/'public_html/images/yourdartclub-logo.svg',assets/'Wordmark.imageset/Wordmark.svg')
+(assets/'Wordmark.imageset/Wordmark.png').unlink(missing_ok=True)
+(assets/'Wordmark.imageset/Contents.json').write_text(json.dumps({'images':[{'filename':'Wordmark.svg','idiom':'universal'}],'properties':{'preserves-vector-representation':True},'info':{'author':'xcode','version':1}}))
 (assets/'Contents.json').write_text(json.dumps({'info':{'author':'xcode','version':1}}))
 (assets/'AppIcon.appiconset/Contents.json').write_text(json.dumps({'images':[{'filename':'Icon.png','idiom':'universal','platform':'ios','size':'1024x1024'}],'info':{'author':'xcode','version':1}}))
 (assets/'Brand.imageset/Contents.json').write_text(json.dumps({'images':[{'filename':'Brand.png','idiom':'universal'}],'info':{'author':'xcode','version':1}}))
-info={'CFBundleDisplayName':'YourDartClub','CFBundleIdentifier':'$(PRODUCT_BUNDLE_IDENTIFIER)','CFBundleName':'$(PRODUCT_NAME)','CFBundleExecutable':'$(EXECUTABLE_NAME)','CFBundlePackageType':'APPL','CFBundleShortVersionString':'0.1.0','CFBundleVersion':'1','LSRequiresIPhoneOS':True,'UILaunchScreen':{},'UISupportedInterfaceOrientations':['UIInterfaceOrientationPortrait','UIInterfaceOrientationLandscapeLeft','UIInterfaceOrientationLandscapeRight'],'UISupportedInterfaceOrientations~ipad':['UIInterfaceOrientationPortrait','UIInterfaceOrientationPortraitUpsideDown','UIInterfaceOrientationLandscapeLeft','UIInterfaceOrientationLandscapeRight'],'UIRequiresFullScreen':False,'UIApplicationSceneManifest':{'UIApplicationSupportsMultipleScenes':False}}
+info={'CFBundleDisplayName':'YourDartClub','CFBundleIdentifier':'$(PRODUCT_BUNDLE_IDENTIFIER)','CFBundleName':'$(PRODUCT_NAME)','CFBundleExecutable':'$(EXECUTABLE_NAME)','CFBundlePackageType':'APPL','CFBundleShortVersionString':'1.3','CFBundleVersion':'5','LSRequiresIPhoneOS':True,'ITSAppUsesNonExemptEncryption':False,'UILaunchScreen':{},'UISupportedInterfaceOrientations':['UIInterfaceOrientationPortrait','UIInterfaceOrientationLandscapeLeft','UIInterfaceOrientationLandscapeRight'],'UISupportedInterfaceOrientations~ipad':['UIInterfaceOrientationPortrait','UIInterfaceOrientationPortraitUpsideDown','UIInterfaceOrientationLandscapeLeft','UIInterfaceOrientationLandscapeRight'],'UIRequiresFullScreen':False,'UIApplicationSceneManifest':{'UIApplicationSupportsMultipleScenes':True}}
+receiver_id = os.environ.get('YDCCAST_RECEIVER_ID', (root/'GoogleCastReceiverID.txt').read_text().strip() if (root/'GoogleCastReceiverID.txt').exists() else '')
+info['GoogleCastReceiverID'] = receiver_id
+info['NSAppTransportSecurity'] = {'NSAllowsLocalNetworking': True}
+info['NSLocalNetworkUsageDescription'] = 'YourDartClub finds your TV to show scores while you keep scoring on your iPhone.'
+info['NSBonjourServices'] = ['_googlecast._tcp'] + (['_'+receiver_id+'._googlecast._tcp'] if receiver_id else [])
+info['UIApplicationSceneManifest']['UISceneConfigurations'] = {'UIWindowSceneSessionRoleExternalDisplayNonInteractive':[{'UISceneConfigurationName':'Board display','UISceneDelegateClassName':'$(PRODUCT_MODULE_NAME).BoardSceneDelegate'}]}
 for mode in ['Debug','Release']:
     output=dict(info)
     (root/f'YourDartClub/Info-{mode}.plist').write_bytes(plistlib.dumps(output))
+previous_project = root/'YourDartClub.xcodeproj/project.pbxproj'
+import re
+team_match = re.search(r'DEVELOPMENT_TEAM = \"?([A-Z0-9]+)\"?;', previous_project.read_text()) if previous_project.exists() else None
 objects={}
 def ident(key): return hashlib.sha1(key.encode()).hexdigest()[:24].upper()
 def obj(key,value): objects[ident(key)]=value;return ident(key)
 def ref(path,typ): return obj(path,{'isa':'PBXFileReference','lastKnownFileType':typ,'path':path,'sourceTree':'<group>'})
 sourcepaths=sorted([str(p.relative_to(root)) for p in (root/'YourDartClub/App').glob('*.swift')]+[str(p.relative_to(root)) for p in (root/'YourDartClub/Core').glob('*.swift')])
 refs=[ref(p,'sourcecode.swift') for p in sourcepaths]
+proto_root = root/'Vendor/protobuf-25.3/objectivec'
+proto_refs = [ref(str(p.relative_to(root)), 'sourcecode.c.objc') for p in [proto_root/'GPBProtocolBuffers.m']]
+refs += proto_refs
 resources=[ref('YourDartClub/Resources/Assets.xcassets','folder.assetcatalog')]
+cast_root = root/'Vendor/GoogleCast483/GoogleCast.xcframework'
+if not cast_root.exists(): raise SystemExit('Run python3 ios/setup-cast.py first.')
+frameworks = [ref(str(cast_root.relative_to(root)), 'wrapper.xcframework')]
+cast_content = cast_root/'ios-arm64/GoogleCast.framework'
+resources += [ref(str(p.relative_to(root)), 'wrapper.plug-in') for p in cast_content.glob('*.bundle')]
+resources += [ref('YourDartClub/Resources/PrivacyInfo.xcprivacy', 'text.xml')]
+resources += [ref('Vendor/GoogleCast483/OpenSourceLicenses','folder')]
+resources += [ref('YourDartClub/Resources/Protobuf-LICENSE.txt','text')]
+shutil.copyfile(root/'Vendor/protobuf-25.3/LICENSE',root/'YourDartClub/Resources/Protobuf-LICENSE.txt')
 langs=[]
 for lang in ['nl','en','fr','de']:
     r=ref(f'YourDartClub/Resources/{lang}.lproj/Localizable.strings','text.plist.strings');objects[r]['name']=lang; langs.append(r)
 resources.append(obj('localization',{'isa':'PBXVariantGroup','children':langs,'name':'Localizable.strings','sourceTree':'<group>'}))
 product=obj('product',{'isa':'PBXFileReference','explicitFileType':'wrapper.application','path':'YourDartClub.app','sourceTree':'BUILT_PRODUCTS_DIR'})
-main=obj('main',{'isa':'PBXGroup','children':refs+resources+[product],'sourceTree':'<group>'})
+main=obj('main',{'isa':'PBXGroup','children':refs+resources+frameworks+[product],'sourceTree':'<group>'})
 def phase(name,kind,files):return obj(name,{'isa':kind,'buildActionMask':'2147483647','files':[obj('build'+f,{'isa':'PBXBuildFile','fileRef':f}) for f in files],'runOnlyForDeploymentPostprocessing':'0'})
-phases=[phase('sources','PBXSourcesBuildPhase',refs),phase('resources','PBXResourcesBuildPhase',resources),phase('frameworks','PBXFrameworksBuildPhase',[])]
+phases=[phase('sources','PBXSourcesBuildPhase',refs),phase('resources','PBXResourcesBuildPhase',resources),phase('frameworks','PBXFrameworksBuildPhase',frameworks)]
+for f in proto_refs: objects[ident('build'+f)]['settings'] = {'COMPILER_FLAGS':'-fno-objc-arc -Wno-deprecated-declarations'}
 def configs(name,target=False):
     configs=[]
     for mode in ['Debug','Release']:
         settings={'SDKROOT':'iphoneos','IPHONEOS_DEPLOYMENT_TARGET':'17.0','SWIFT_VERSION':'5.0','CLANG_ENABLE_MODULES':'YES','SWIFT_OPTIMIZATION_LEVEL':'-Onone' if mode=='Debug' else '-O'}
-        if target: settings.update({'PRODUCT_BUNDLE_IDENTIFIER':'com.yourdartclub.iphone','PRODUCT_NAME':'YourDartClub','TARGETED_DEVICE_FAMILY':'1,2','INFOPLIST_FILE':f'YourDartClub/Info-{mode}.plist','ASSETCATALOG_COMPILER_APPICON_NAME':'AppIcon','CODE_SIGN_STYLE':'Automatic','OTHER_LDFLAGS':['$(inherited)','-lsqlite3'],'SWIFT_ACTIVE_COMPILATION_CONDITIONS':'DEBUG' if mode=='Debug' else ''})
+        if target and team_match: settings['DEVELOPMENT_TEAM'] = team_match.group(1)
+        if target: settings.update({'HEADER_SEARCH_PATHS':['$(inherited)','$(SRCROOT)/Vendor/protobuf-25.3/objectivec'],'PRODUCT_BUNDLE_IDENTIFIER':'com.yourdartclub.iphone','PRODUCT_NAME':'YourDartClub','TARGETED_DEVICE_FAMILY':'1,2','INFOPLIST_FILE':f'YourDartClub/Info-{mode}.plist','ASSETCATALOG_COMPILER_APPICON_NAME':'AppIcon','CODE_SIGN_STYLE':'Automatic','OTHER_LDFLAGS':['$(inherited)','-lsqlite3','-ObjC','-lc++','-framework','AVFoundation','-framework','AVKit','-framework','AVRouting'],'SWIFT_ACTIVE_COMPILATION_CONDITIONS':'DEBUG' if mode=='Debug' else ''})
         configs.append(obj(name+mode,{'isa':'XCBuildConfiguration','buildSettings':settings,'name':mode}))
     return obj(name,{'isa':'XCConfigurationList','buildConfigurations':configs,'defaultConfigurationIsVisible':'0','defaultConfigurationName':'Release'})
 target=obj('target',{'isa':'PBXNativeTarget','buildConfigurationList':configs('targetconfigs',True),'buildPhases':phases,'buildRules':[],'dependencies':[],'name':'YourDartClub','productName':'YourDartClub','productReference':product,'productType':'com.apple.product-type.application'})

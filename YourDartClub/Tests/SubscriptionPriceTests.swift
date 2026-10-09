@@ -9,9 +9,9 @@ final class SubscriptionPriceTests: XCTestCase {
         let year = SubscriptionPriceDisplay(productID:yearly,amount:90,currency:"USD",sandbox:true)
         XCTAssertEqual(month.currency,"EUR")
         XCTAssertTrue(month.usesEuropeanReference)
-        XCTAssertEqual(month.amount,10)
-        XCTAssertEqual(year.amount,100)
-        XCTAssertEqual(month.amount * 12 - year.amount,20)
+        XCTAssertEqual(month.amount,Decimal(995) / 100)
+        XCTAssertEqual(year.amount,Decimal(8999) / 100)
+        XCTAssertEqual(month.amount * 12 - year.amount,Decimal(2941) / 100)
     }
     func testBritishPricesArePreservedInSandboxAndProduction() {
         for sandbox in [true,false] {

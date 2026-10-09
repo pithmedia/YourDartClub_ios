@@ -39,6 +39,20 @@ public final class GameDatabase {
         } catch { sqlite3_close(db); db = nil; throw error }
     }
     deinit { sqlite3_close(db) }
+    /// Read the source and create its successor under the same write lock.
+    /// Repeated taps (even after reopening the database) return the same match.
+    public func rematch(_ sourceID: String, starter: Int? = nil) throws -> LocalGame {
+        try execute("BEGIN IMMEDIATE")
+        do {
+            let games = try load()
+            guard let source = games.first(where: { $0.id == sourceID }), source.canRematch else { throw GameError.invalidVisit }
+            let result: LocalGame
+            if let existing = games.first(where: { $0.rematchOf == sourceID }) { result = existing }
+            else { result = try source.rematch(starter:starter); try save(result) }
+            try execute("COMMIT")
+            return result
+        } catch { try? execute("ROLLBACK"); throw error }
+    }
     private func execute(_ sql: String) throws { guard sqlite3_exec(db,sql,nil,nil,nil) == SQLITE_OK else { throw GameError.database } }
     public func save(_ game: LocalGame) throws {
         _ = try DartRules.replay(game)

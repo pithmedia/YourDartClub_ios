@@ -4,6 +4,11 @@ struct GameView: View {
     @Environment(\.locale) private var locale
     @EnvironmentObject var model: AppModel
     let id: String
+    var onRematch: ((String) -> Void)? = nil
+    @State private var rematchID: String?
+    @State private var rematchStarter: Int?
+    @State private var startingRematch = false
+    private var gameID: String { rematchID ?? id }
     @State private var input = ""
     @State private var darts = 3
     @State private var previewDarts = 1
@@ -18,19 +23,22 @@ struct GameView: View {
     @State private var checkoutDialog = false
     var body: some View {
         GeometryReader { geometry in
-            if let game = model.games.first(where:{$0.id == id}), let state = try? DartRules.replay(game) {
+            if let game = model.games.first(where:{$0.id == gameID}), let state = try? DartRules.replay(game) {
                 let wide = geometry.size.width > geometry.size.height * 1.15
                 let layout = wide ? AnyLayout(HStackLayout(spacing:12)) : AnyLayout(VStackLayout(spacing:8))
-                layout {
+                Group {
+                    if state.winner != nil { resultScreen(game,state) }
+                    else { layout {
                     scoreboard(game,state).frame(maxWidth:.infinity,maxHeight:.infinity)
                         .frame(width:wide ? geometry.size.width * 0.35 - 16 : nil)
                     controls(game,state,compact:wide && geometry.size.height < 380)
                         .frame(maxWidth:.infinity)
                         .frame(height:wide ? geometry.size.height - 16 : min(420,max(348,geometry.size.height * 0.59)))
+                    } }
                 }.padding(8).background(ClubBackdrop())
-                    .sheet(isPresented:$cast) { CastOptionsView(target:.local(id)).environmentObject(model) }
+                    .sheet(isPresented:$cast) { CastOptionsView(target:.local(gameID)).environmentObject(model) }
                     .sheet(isPresented:$details) { detailsView(game) }
-                    .sheet(isPresented:$statistics) { NavigationStack { LocalMatchStatisticsView(gameID:id,side:statisticsSide).toolbar { ToolbarItem(placement:.confirmationAction) { Button("done") { statistics = false } } } }.tint(ClubStyle.lime) }
+                    .sheet(isPresented:$statistics) { NavigationStack { LocalMatchStatisticsView(gameID:gameID,side:statisticsSide).toolbar { ToolbarItem(placement:.confirmationAction) { Button("done") { statistics = false } } } }.tint(ClubStyle.lime) }
                     .alert(game.config.checkout == "double" ? "double_confirm" : "finish_confirm",isPresented:$checkoutDialog) {
                         Button("cancel",role:.cancel) { finish = false }
                         Button("save_score") { finish = true; save(mode,game,state) }
@@ -47,8 +55,46 @@ struct GameView: View {
             .toolbarBackground(ClubStyle.background,for:.navigationBar).toolbarBackground(.visible,for:.navigationBar)
             .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
             .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+            .onChange(of:id) { _,_ in rematchID = nil; rematchStarter = nil; startingRematch = false; reset() }
             .onChange(of:darts) { _,_ in finish = false }
             .onChange(of:mode) { _,_ in finish = false }
+    }
+    private func resultScreen(_ game: LocalGame, _ state: ScoreState) -> some View {
+        ScrollView {
+            VStack(spacing:20) {
+                MatchResultSummary(names:game.config.players,legs:state.legs,
+                    averages:state.dartsThrown.indices.map { state.dartsThrown[$0] > 0 ? Double(state.points[$0]) * 3 / Double(state.dartsThrown[$0]) : nil },winner:state.winner ?? 0)
+                if game.canRematch {
+                    let existing = model.games.first { $0.rematchOf == game.id }
+                    let starter = existing.flatMap { ["A","B","C","D"].firstIndex(of:$0.config.starter) } ?? rematchStarter ?? game.nextStarter
+                    VStack(spacing:12) {
+                        Text("rematch_starter").font(.subheadline).foregroundStyle(ClubStyle.muted)
+                        Text(game.config.players[starter]).font(.title3.bold()).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
+                        if game.config.players.count > 1 && existing == nil {
+                            Button { rematchStarter = (starter + 1) % game.config.players.count } label: {
+                                Label("switch_starter",systemImage:"arrow.triangle.2.circlepath").frame(minHeight:44)
+                            }.accessibilityValue(game.config.players[starter])
+                        }
+                        Button {
+                            guard !startingRematch else { return }
+                            startingRematch = true
+                            if let next = model.rematch(game.id,starter:starter) {
+                                rematchID = next; rematchStarter = nil; reset(); onRematch?(next)
+                            }
+                            startingRematch = false
+                        } label: { Label(existing == nil ? "play_rematch" : "open_rematch",systemImage:"play.fill") }
+                            .buttonStyle(ClubButton(primary:true)).disabled(startingRematch)
+                            .accessibilityIdentifier("play-rematch")
+                    }.padding(16).background(ClubStyle.card,in:RoundedRectangle(cornerRadius:18))
+                }
+                Button { undo(game); rematchStarter = nil } label: {
+                    Label("correct_result",systemImage:"arrow.uturn.backward").frame(minHeight:44)
+                }.accessibilityIdentifier("correct-result")
+                Button { statisticsSide = state.winner ?? 0; statistics = true } label: {
+                    Label("match_statistics",systemImage:"chart.bar.xaxis").frame(minHeight:44)
+                }
+            }.frame(maxWidth:640).frame(maxWidth:.infinity).padding(12)
+        }.accessibilityIdentifier("match-result")
     }
     private func detailsView(_ game: LocalGame) -> some View {
         NavigationStack {
@@ -65,11 +111,11 @@ struct GameView: View {
                     if game.config.players.count != 2 { Text("multiplayer_local") }
                     else if !game.uploadRequested {
                         Button("upload") { upload = true }.disabled(!model.loggedIn)
-                            .confirmationDialog("upload",isPresented:$upload,titleVisibility:.visible) { Button("confirm_upload") { model.requestUpload(id) } } message: { Text("upload_notice") }
+                            .confirmationDialog("upload",isPresented:$upload,titleVisibility:.visible) { Button("confirm_upload") { model.requestUpload(gameID) } } message: { Text("upload_notice") }
                     }
                     Text("offline_notice").font(.caption)
                 }
-                Section { NavigationLink { LocalMatchStatisticsView(gameID:id) } label: { Label("match_statistics",systemImage:"chart.bar.xaxis") } }
+                Section { NavigationLink { LocalMatchStatisticsView(gameID:gameID) } label: { Label("match_statistics",systemImage:"chart.bar.xaxis") } }
                 Section("history") {
                     ForEach(game.events.reversed()) { event in
                         HStack { Text(tr(event.kind)); Spacer(); Text(event.kind == "visit" ? String(event.score) : "↶"); if event.bust { Text("bust") } }
@@ -92,6 +138,12 @@ struct GameView: View {
                 Spacer()
                 Text(textFormat("leg_number",state.legs.reduce(0,+) + (state.winner == nil ? 1 : 0)))
             }.font(.caption.bold()).foregroundStyle(ClubStyle.muted)
+            if canSelectStarter(game) {
+                Button { selectStarter(game,(state.turn + 1) % game.config.players.count) } label: {
+                    Label("switch_starter",systemImage:"arrow.triangle.2.circlepath").font(.subheadline.bold()).frame(maxWidth:.infinity,minHeight:44)
+                }.buttonStyle(.plain).foregroundStyle(ClubStyle.lime)
+                    .accessibilityValue(game.config.players[state.turn])
+            }
             if game.config.players.count <= 2 {
                 HStack(spacing:8) {
                     ForEach(game.config.players.indices,id:\.self) { side in playerCard(game,state,side) }
@@ -119,7 +171,7 @@ struct GameView: View {
     }
     private func selectStarter(_ game: LocalGame, _ side: Int) {
         guard canSelectStarter(game) else { return }
-        if model.changeStarter(id,to:side) { reset() }
+        if model.changeStarter(gameID,to:side) { reset() }
     }
     private func playerCard(_ game: LocalGame, _ state: ScoreState, _ side: Int) -> some View {
         let active = state.turn == side && state.winner == nil
@@ -203,7 +255,7 @@ struct GameView: View {
                 if compact {
                     Menu {
                         Button("no_score") { quickScore(0,game,state) }
-                        Button("Bust") { if model.append(.init(score:0,darts:darts,bust:true),to:id) { reset() } }
+                        Button("Bust") { if model.append(.init(score:0,darts:darts,bust:true),to:gameID) { reset() } }
                         Picker("darts",selection:$darts) { ForEach(1...3,id:\.self) { Text(textFormat("visit_darts",$0)).tag($0) } }
                     } label: { Image(systemName:"ellipsis.circle").frame(width:44,height:44) }.disabled(state.winner != nil).accessibilityLabel(Text("visit_options"))
                 }
@@ -221,7 +273,7 @@ struct GameView: View {
             }.frame(maxHeight:.infinity).disabled(state.winner != nil)
             if !compact { HStack(spacing:6) {
                 Button("no_score") { quickScore(0,game,state) }.frame(maxWidth:.infinity,minHeight:44)
-                Button("Bust") { if model.append(.init(score:0,darts:darts,bust:true),to:id) { reset() } }.frame(maxWidth:.infinity,minHeight:44)
+                Button("Bust") { if model.append(.init(score:0,darts:darts,bust:true),to:gameID) { reset() } }.frame(maxWidth:.infinity,minHeight:44)
                 Picker("darts",selection:$darts) { ForEach(1...3,id:\.self) { Text(textFormat("visit_darts",$0)).tag($0) } }.pickerStyle(.menu).frame(minHeight:44)
             }.font(.caption.bold()).disabled(state.winner != nil) }
             Button { save(mode,game,state) } label: {
@@ -254,7 +306,7 @@ struct GameView: View {
         guard let number = Int(input) else { return }
         do {
             let event = try ScoreEntry.event(input:number,before:state.remaining[state.turn],mode:target,checkout:game.config.checkout,darts:darts,confirmed:finish && mode == target)
-            if model.append(event,to:id) { reset() }
+            if model.append(event,to:gameID) { reset() }
         } catch EntryError.checkoutConfirmation { mode = target; finish = false; checkoutDialog = true }
         catch { model.issue = "invalid_score" }
     }
@@ -262,14 +314,14 @@ struct GameView: View {
         mode = .score
         choose(String(value))
         if model.quick && value != state.remaining[state.turn] && DartRules.possible(value,darts:darts) {
-            if model.append(.init(score:value,darts:darts),to:id) { reset() }
+            if model.append(.init(score:value,darts:darts),to:gameID) { reset() }
         }
     }
     private func undo(_ game: LocalGame) {
         guard let action = try? InputBackAction.resolve(input:input,events:game.events) else { return }
         switch action {
         case .clearInput: choose("")
-        case .undoVisit(let visit): if model.append(.undo(visit),to:id) { reset() }
+        case .undoVisit(let visit): if model.append(.undo(visit),to:gameID) { reset() }
         case .none: break
         }
     }
@@ -302,5 +354,39 @@ struct LocalMatchStatisticsView: View {
                 }
             }
         }.clubScreen().navigationTitle("").navigationBarTitleDisplayMode(.inline).toolbar(.visible,for:.navigationBar)
+    }
+}
+
+/// Shared presentation only: each scorer retains its own confirmation and undo actions.
+struct MatchResultSummary: View {
+    let names: [String]
+    let legs: [Int]
+    let averages: [Double?]
+    let winner: Int
+    var body: some View {
+        VStack(spacing:16) {
+            Image(systemName:"trophy.fill").font(.system(size:52)).foregroundStyle(ClubStyle.lime).accessibilityHidden(true)
+            Text("winner").font(.title2.bold()).foregroundStyle(ClubStyle.lime)
+            Text(names[winner]).font(.largeTitle.bold()).multilineTextAlignment(.center)
+                .fixedSize(horizontal:false,vertical:true).accessibilityAddTraits(.isHeader)
+            Text(legs.map(String.init).joined(separator:" – "))
+                .font(ClubStyle.numberFont(44)).minimumScaleFactor(0.65).lineLimit(1)
+                .accessibilityLabel(Text("final_legs")).accessibilityValue(legs.map(String.init).joined(separator:" – "))
+            ForEach(names.indices,id:\.self) { index in
+                VStack(alignment:.leading,spacing:8) {
+                    Text(names[index]).font(.headline).fixedSize(horizontal:false,vertical:true)
+                    HStack {
+                        Label(String(legs[index]),systemImage:index == winner ? "trophy.fill" : "target")
+                            .accessibilityLabel(Text("legs")).accessibilityValue(String(legs[index]))
+                        Spacer()
+                        Text("team_average")
+                        Text(teamAverage(averages[index])).bold().monospacedDigit()
+                    }.font(.subheadline)
+                }.foregroundStyle(index == winner ? ClubStyle.lime : ClubStyle.text)
+                    .padding(14).frame(maxWidth:.infinity,alignment:.leading)
+                    .background(ClubStyle.card,in:RoundedRectangle(cornerRadius:14))
+                    .accessibilityElement(children:.combine)
+            }
+        }
     }
 }

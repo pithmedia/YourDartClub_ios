@@ -9,7 +9,7 @@ import StoreKit
             RootView().environmentObject(model)
                 .environment(\.locale,Locale(identifier:AppLanguage.supported.contains(language) ? language : AppLanguage.code))
                 .preferredColorScheme(.dark).tint(ClubStyle.lime)
-                .onChange(of: phase) { _, value in if value == .active { Task { await model.refresh(force:true) } } }
+                .onChange(of: phase) { _, value in if value == .active { BoardCasting.shared.applicationDidBecomeActive(); Task { await model.refresh(force:true) } } }
         }
     }
 }
@@ -50,7 +50,11 @@ struct RootView: View {
             if ProcessInfo.processInfo.arguments.contains("--airplay-picker-test") { AirPlayBoardStream.shared.runPickerSelfTest() }
             if ProcessInfo.processInfo.arguments.contains("--airplay-self-test") { await AirPlayBoardStream.shared.runSelfTest() }
             #endif
-            BoardCasting.shared.configure(); while !Task.isCancelled { await model.refresh(); try? await Task.sleep(for:.seconds(15)) } }
+            BoardCasting.shared.configure()
+            #if DEBUG
+            await BoardCasting.shared.diagnoseDiscovery()
+            #endif
+            while !Task.isCancelled { await model.refresh(); try? await Task.sleep(for:.seconds(15)) } }
     }
 }
 struct GamesView: View {
@@ -100,7 +104,7 @@ struct GamesView: View {
                 .toolbar(.hidden,for:.navigationBar)
         } detail: {
             if let id = selectedGame {
-                GameView(id:id).id(id)
+                GameView(id:id,onRematch:{ selectedGame = $0 }).id(id)
             } else {
                 VStack(spacing:24) {
                     Image("Brand").resizable().scaledToFit().frame(width:116,height:116).clipShape(RoundedRectangle(cornerRadius:28)).shadow(color:ClubStyle.lime.opacity(0.12),radius:40).accessibilityHidden(true)
@@ -243,6 +247,14 @@ struct AccountView: View {
 
                 }
                 Section("legal_information") { LegalLinks() }
+                Section("app_information") {
+                    LabeledContent("app_version",value:appVersion).textSelection(.enabled)
+                    LabeledContent("app_build_number",value:appBuild).textSelection(.enabled)
+                    ShareLink(item:"YourDartClub iOS · \(appVersion) (\(appBuild))") {
+                        Label("share_app_version",systemImage:"square.and.arrow.up")
+                            .frame(minHeight:44)
+                    }
+                }.listRowBackground(ClubStyle.card)
                 Section { Text("account_notice"); Text("practice_notice") }.font(.footnote).foregroundStyle(.secondary)
             }.clubScreen().navigationTitle("").navigationBarTitleDisplayMode(.inline)
                 .toolbar(.hidden,for:.navigationBar)
@@ -254,6 +266,8 @@ struct AccountView: View {
                 .confirmationDialog("logout",isPresented:$logout,titleVisibility:.visible) { Button("logout",role:.destructive) { Task { await model.logout() } } } message: { Text("logout_notice") }
         }
     }
+    private var appVersion: String { Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "—" }
+    private var appBuild: String { Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "—" }
     private var canSignIn: Bool { !busy && !login.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && !password.isEmpty }
     private func signIn() {
         guard canSignIn else { return }

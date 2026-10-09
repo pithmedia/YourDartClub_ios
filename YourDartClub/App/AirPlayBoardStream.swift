@@ -13,7 +13,7 @@ private final class BoardHTTPServer: @unchecked Sendable {
     init(store: LiveBoardStream) throws { self.store = store; listener = try NWListener(using:.tcp,on:.any) }
     func start() async throws -> UInt16 {
         try await withCheckedThrowingContinuation { continuation in
-            queue.async {
+            queue.async { [self] in
                 var waiting = true
                 self.listener.stateUpdateHandler = { state in
                     guard waiting else { return }

@@ -9,7 +9,7 @@ Basis: `/api/mobile/v1`. HTTPS vereist; de iOS-app gebruikt in Debug en Release 
 `POST /login`:
 
 ```json
-{"login":"captain@example.test","password":"…","deviceId":"a UUID","deviceSecret":"64 lowercase hex characters"}
+{"login":"admin@example.test","password":"…","deviceId":"a UUID","deviceSecret":"64 lowercase hex characters"}
 ```
 
 `login` is een e-mailadres voor een persoonlijk account of de gedeelde teamlogin. `deviceId` wordt één keer per installatie aangemaakt. `deviceSecret` is 32 cryptografisch willekeurige bytes, als 64 lowercase hextekens. Bewaar beide in Keychain/Keystore en hergebruik ze bij volgende logins. De server registreert alleen de hash van dit geheim. Een bestaand deviceId met een ander geheim levert 409 op. Het openbare deviceId uit een opgeslagen partij is dus onvoldoende om dat apparaat na te doen.
@@ -74,6 +74,52 @@ Voor een volgende overdrachtsflow zijn nodig: huidige eigenaar volledig laten sy
 
 De website heeft `/api/club` met aanmaak, spelers, indeling, scoreteller en correcties; die gebruikt sessie/CSRF-authenticatie. `/api/counter-access` heeft een 30 seconden durende cachelease en is niet geschikt voor langdurige offline invoer. `/api/tv/*` en `/tv/pair` bestaan voor tv-koppeling; `/api/autodarts/ingest` gebruikt de bestaande extension-authenticatie. De mobiele v1 biedt hiervoor geen nieuwe mutatie- of koppelroutes.
 
-`LiveCounter`, `DartEngine` en wedstrijden zijn A/B-gebaseerd. Meerdere spelers in een avond zijn geen 3/4-persoonspartij op één bord. De iOS-app ondersteunt inmiddels lokale partijen met twee, drie of vier spelers, maar deze gedeelde API accepteert nog uitsluitend twee spelers. De app blokkeert uploads van drie- en vierpersoonspartijen, ook in de batchbouwer. Officiële avonden, schema's, statistieken en Autodarts worden door mobiele uploads niet gewijzigd.
+`LiveCounter`, `DartEngine` en wedstrijden zijn A/B-gebaseerd. Meerdere spelers in een avond zijn geen 3/4-persoonspartij op één bord. De iOS-app ondersteunt inmiddels lokale partijen met één, twee, drie of vier spelers, maar deze gedeelde API accepteert nog uitsluitend twee spelers. De app blokkeert uploads van solo-, drie- en vierpersoonspartijen, ook in de batchbouwer. Officiële avonden, schema's, statistieken en Autodarts worden door mobiele uploads niet gewijzigd.
 
 Offline officiële teamavonden vragen nog een commerciële beslissing over toegangsduur en een duurzaam schrijf- en planningscontract. De huidige versie geeft daar geen offline schrijfbevoegdheid voor. Lokale oefeningen blijven lokaal speelbaar; serveruploads vragen actuele bestaande teamtoegang.
+
+## Online platformomgeving binnen iOS / Android
+
+De app kan de bestaande, volledige teaminterface openen met een geïsoleerde WebView. Er is hiervoor geen tweede toernooimodel: mutaties gebruiken de bestaande `/api/club`, `/api/counter-access`, `/api/counter-preview` en `/api/autodarts` routes, inclusief TeamContext, CSRF, revisions, leases en beheerrechten.
+
+1. Maak een niet-persistente WebView-sessie aan (niet delen met browser/accountsessies).
+2. Laad **POST https://www.yourdartclub.com/mobile/team** met `Authorization: Bearer <mobile token>`, `X-Team-Id: <team>`, `Content-Type: application/json` en `Accept: text/html`.
+3. Body: `{"locale":"nl"}`. Optioneel `"event":"<evening-id>"` om direct een eigen event te openen of `"create":true` om het aanmaakformulier te openen. Dit maakt nog geen event aan.
+4. De server valideert token, actuele teamtoegang en eventeigendom, maakt een nieuwe sessiecookie en antwoordt met **303** naar `/mobile/team` (event/create als onschuldige queryparameters). Laat de WebView de cookie verwerken en dezelfde-origin redirect volgen.
+5. De pagina bevat CSRF- en teammetadata. De bestaande websitecode verzorgt alle teamacties. Alleen de initialiserende POST is CSRF-vrij wegens verplichte bearer-authenticatie; latere mutaties houden normale CSRF-bescherming.
+6. Token/geheim nooit in URL, JavaScript, localStorage of logs zetten. Sta alleen HTTPS-navigatie op de eigen origin naar `/mobile/team` en `/language` toe. Verwijder WebView-sessie bij sluiten, uitloggen of teamwissel. Herlaad nooit automatisch een onzekere scoreactie.
+
+De websessie is aan het oorspronkelijke mobiele token en team gebonden. Intrekken, verlopen, wachtwoordwijziging en intrekken van de gedeelde login beëindigen toegang. Verzoeken voor andere teams en account-/billing-/adminroutes zijn geblokkeerd. Verwijderen vereist de bestaande eenmalige beheerderswachtwoordcontrole; genodigde accounts kunnen niet verwijderen.
+
+Dit is online platformgebruik. De `/sync`-wachtrij blijft uitsluitend voor lokale tweepersoonsoefeningen; die mag geen officiële toernooiacties bevatten. Bij netwerkproblemen bewaart de bestaande teller zijn huidige invoer in het venster en controleert hij revisions/visit-id’s bij opslaan; sluit het venster niet zonder op te slaan. Na sluiten is onopgeslagen invoer niet gegarandeerd hersteld.
+
+Backendpublicatie is nog niet uitgevoerd. Integratietests: MobilePlatformTest, naast de bestaande Club/Counter/Tournament-tests. Dezelfde bridge is bruikbaar voor Android mits WebView POST-headers, cookies en redirectgedrag daar expliciet worden getest.
+
+### Tv openen vanuit de app
+
+Voeg `"destination":"tv"` toe aan de JSON-body van POST `/mobile/team`. De server stuurt na dezelfde bearer-/teamcontrole een 303 naar `/tv/pair`. De geïsoleerde mobiele sessie mag `/tv/pair` en POST `/tv/displays/{id}/settings` en `/tv/displays/{id}/revoke` gebruiken. Die acties behouden CSRF, TeamContext, betaalde toegang, eigen-teamcontrole en eenmalige codeverzilvering. Sta deze exacte navigatiepaden ook toe in de WebView. Er komt geen brede toegang tot account- of abonnementsbeheer bij.
+
+Dezelfde bestaande TV-app/tv-browser blijft alleen-lezen; castcodes geven op zichzelf geen leestoegang. Dit ondersteunt team-events, niet lokale oefeningen. Directe AirPlay-/Chromecast-integratie is niet onderdeel van deze route.
+
+
+## Native event- en bordbediening (26 september 2026)
+
+De nieuwe iPhone-app gebruikt voor events de onderstaande JSON-routes in plaats van `/mobile/team`. De webbrug blijft compatibel met oudere builds. Alle officiële acties vereisen bearer-authenticatie, `X-Team-Id`, actuele teamtoegang en de bestaande TeamContext-grenzen.
+
+| Route | Gebruik |
+| --- | --- |
+| POST `/club` | Dezelfde whitelist en validatie als `ClubController.update`: create, add-player, add-board, pair, join, finish, delete, start-match, score en counter-acties. Antwoord is de complete teamsnapshot. Create voegt `createdId` toe; add-player `addedPlayerId`. |
+| GET `/club` | Complete teamsnapshot; events bevatten nu ook serverberekende `standings` (bij playoffs alleen leaguefase). |
+| POST `/counter-access` | `{action: acquire/renew/release, id, matchId, counterToken}`. Token: 64 hextekens. Lease 30 seconden; de iPhone vernieuwt iedere 8 seconden. |
+| POST `/tv/pair` | `{code,name,evening_id,board,page_size:1,rotation_seconds:10,locale}`. Eenmalige code, bestaand bord in eigen team. Antwoord `{paired:true,displayId}`. Geen cookie/sessie nodig. |
+| POST `/tv/revoke` | `{displayId}`. Alleen gekoppelde tv van dit team; antwoord `{revoked:true}`. |
+
+Counter-start vereist `id`, `revision`, `matchId`, `counterToken`, `starter` (A/B), `initialA`, `initialB`. Counter-visit vereist daarnaast `counterRevision` en `visit:{id,score,darts,finish,bust}`. Undo/finish gebruiken eveneens de actuele `counterRevision`. De client selecteert de live match op `(team,event,board)` opnieuw na iedere snapshot. Counter-finish schrijft het officiële resultaat en laat de bestaande engine de volgende beschikbare match plannen.
+
+Officiële counter-writes zijn geen offline uploadbatch. Bij een verloren antwoord niet automatisch een nieuwe visit verzenden: herlees de snapshot en zoek de oorspronkelijke visit-ID. Als dat niet kan, blokkeer verdere invoer tot de actuele stand bekend is. Controleer altijd opnieuw de tellerlease.
+
+### Tijdelijke lokale tv-relay
+
+`POST /local-cast/pair` is apart van teamrechten: `{code,frame}` mag uitsluitend een nog ongekoppelde tv met een geldige code koppelen. Het antwoord geeft een willekeurig `writer`-token dat alleen deze tijdelijke schermkopie kan verversen. Het leest of wijzigt nooit spelers, events of officiële scores. `POST /local-cast/frame` gebruikt dit writer-token als bearer en `{frame}`. `POST /local-cast/stop` met hetzelfde token en `{stop:true}` ontkoppelt de tijdelijke tv en trekt het schrijftoken in. Maximaal vier spelers, begrensde strings/getallen, geen HTML. Pairing 10/minuut, frames 90/minuut. De tv leest via zijn bestaande HttpOnly-cookie `/api/tv/state`, met `localFrame` en `localUpdatedAt`. Koppeling maximaal vier uur, eenmalige code, ontkoppelen op de tv maakt het writer-token onbruikbaar. Laravel-cache moet over webservers gedeeld zijn.
+
+Frame: `title`, `subtitle`, `message`, `legsLabel`, optioneel `stale`/`staleMessage`, en `players:[{name,remaining,legs,active,advice:[String]}]`. Dezelfde display-only framevorm gaat via Google Cast naar `urn:x-cast:com.yourdartclub.board`. De native AirPlay-weergave gebruikt dezelfde gegevens direct in geheugen.

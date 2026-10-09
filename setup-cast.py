@@ -8,16 +8,23 @@ if not archive.exists():
     urllib.request.urlretrieve('https://dl.google.com/dl/chromecast/sdk/ios/GoogleCastSDK-ios-4.8.3_static.zip', archive)
 assert hashlib.sha256(archive.read_bytes()).hexdigest() == 'b53cc17671154f5ff4ba99165a8b9a6d677e8165715830b91cc1857634b33901', 'Unexpected Google Cast archive checksum'
 with zipfile.ZipFile(archive) as sdk:
+    # Xcode may mark copied vendor resources read-only. Allow repeat setup runs.
+    for member in sdk.infolist():
+        target = root / 'GoogleCast483' / member.filename
+        if target.is_file():
+            target.chmod(target.stat().st_mode | 0o200)
     sdk.extractall(root / 'GoogleCast483')
 print('Google Cast SDK 4.8.3 SHA256:', hashlib.sha256(archive.read_bytes()).hexdigest())
 
 import tarfile
-proto = root / 'protobuf-3.21.12.tar.gz'
+# Cast 4.8.3 calls GPBDescriptor's messageName: selector at startup.
+# The previous 3.21.12 runtime links successfully but crashes when Cast initializes.
+proto = root / 'protobuf-25.3.tar.gz'
 if not proto.exists():
-    urllib.request.urlretrieve('https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.tar.gz', proto)
-assert hashlib.sha256(proto.read_bytes()).hexdigest() == '930c2c3b5ecc6c9c12615cf5ad93f1cd6e12d0aba862b572e076259970ac3a53', 'Unexpected Protobuf archive checksum'
+    urllib.request.urlretrieve('https://github.com/protocolbuffers/protobuf/archive/refs/tags/v25.3.tar.gz', proto)
+assert hashlib.sha256(proto.read_bytes()).hexdigest() == 'd19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e', 'Unexpected Protobuf archive checksum'
 with tarfile.open(proto) as archive:
-    members = [m for m in archive.getmembers() if m.name.startswith('protobuf-3.21.12/objectivec/') or m.name == 'protobuf-3.21.12/LICENSE']
+    members = [m for m in archive.getmembers() if m.name.startswith('protobuf-25.3/objectivec/') or m.name == 'protobuf-25.3/LICENSE']
     # Xcode Cloud's bundled Python can predate tarfile's extraction filters.
     for member in members:
         if not (member.isfile() or member.isdir()) or '..' in Path(member.name).parts:

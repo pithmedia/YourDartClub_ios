@@ -1,0 +1,1550 @@
+{
+  "mode_round-robin": [
+    "Iedereen tegen iedereen",
+    "Round robin",
+    "Toutes rondes",
+    "Jeder gegen jeden"
+  ],
+  "mode_playoffs": [
+    "Poule met finaleronde",
+    "League with playoffs",
+    "Poule avec phase finale",
+    "Liga mit Finalrunde"
+  ],
+  "mode_knockout": [
+    "Knock-out",
+    "Knockout",
+    "Élimination directe",
+    "K.-o.-Turnier"
+  ],
+  "mode_free": [
+    "Losse partijen",
+    "Casual matches",
+    "Parties libres",
+    "Einzelspiele"
+  ],
+  "status_active": [
+    "Actief",
+    "Active",
+    "Actif",
+    "Aktiv"
+  ],
+  "status_completed": [
+    "Afgerond",
+    "Completed",
+    "Terminé",
+    "Abgeschlossen"
+  ],
+  "status_live": [
+    "Bezig",
+    "Live",
+    "En cours",
+    "Läuft"
+  ],
+  "status_queued": [
+    "Gepland",
+    "Scheduled",
+    "Planifié",
+    "Geplant"
+  ],
+  "status_done": [
+    "Gespeeld",
+    "Finished",
+    "Terminé",
+    "Beendet"
+  ],
+  "stage_league": [
+    "Poule",
+    "League",
+    "Poule",
+    "Liga"
+  ],
+  "stage_knockout": [
+    "Finaleschema",
+    "Knockout bracket",
+    "Tableau final",
+    "Finalrunde"
+  ],
+  "stage_friendly": [
+    "Partij",
+    "Match",
+    "Partie",
+    "Spiel"
+  ],
+  "event_sections": [
+    "Eventonderdelen",
+    "Event sections",
+    "Sections de l’événement",
+    "Event-Bereiche"
+  ],
+  "boards": [
+    "Borden",
+    "Boards",
+    "Cibles",
+    "Boards"
+  ],
+  "board": [
+    "Bord",
+    "Board",
+    "Cible",
+    "Board"
+  ],
+  "schedule": [
+    "Planning",
+    "Schedule",
+    "Planning",
+    "Spielplan"
+  ],
+  "standings": [
+    "Stand",
+    "Standings",
+    "Classement",
+    "Tabelle"
+  ],
+  "round": [
+    "Ronde",
+    "Round",
+    "Tour",
+    "Runde"
+  ],
+  "played": [
+    "Gespeeld",
+    "Played",
+    "Joués",
+    "Gespielt"
+  ],
+  "points": [
+    "Punten",
+    "Points",
+    "Points",
+    "Punkte"
+  ],
+  "difference": [
+    "Saldo",
+    "Diff.",
+    "Diff.",
+    "Diff."
+  ],
+  "board_waiting": [
+    "Wachten op de volgende partij op dit bord",
+    "Waiting for the next match on this board",
+    "En attente de la prochaine partie sur cette cible",
+    "Warten auf das nächste Spiel an diesem Board"
+  ],
+  "score_board": [
+    "Tellen op dit bord",
+    "Score this board",
+    "Compter sur cette cible",
+    "An diesem Board zählen"
+  ],
+  "event_name": [
+    "Naam van het event",
+    "Event name",
+    "Nom de l’événement",
+    "Event-Name"
+  ],
+  "date": [
+    "Datum",
+    "Date",
+    "Date",
+    "Datum"
+  ],
+  "mode": [
+    "Spelvorm",
+    "Format",
+    "Format",
+    "Spielformat"
+  ],
+  "track_stats": [
+    "Meetellen in teamstatistieken",
+    "Include in team statistics",
+    "Inclure dans les statistiques de l’équipe",
+    "In Teamstatistik aufnehmen"
+  ],
+  "player_name": [
+    "Naam speler",
+    "Player name",
+    "Nom du joueur",
+    "Spielername"
+  ],
+  "add_board": [
+    "Bord toevoegen",
+    "Add board",
+    "Ajouter une cible",
+    "Board hinzufügen"
+  ],
+  "add_match": [
+    "Partij toevoegen",
+    "Add match",
+    "Ajouter une partie",
+    "Spiel hinzufügen"
+  ],
+  "player_a": [
+    "Speler 1",
+    "Player 1",
+    "Joueur 1",
+    "Spieler 1"
+  ],
+  "player_b": [
+    "Speler 2",
+    "Player 2",
+    "Joueur 2",
+    "Spieler 2"
+  ],
+  "choose_player": [
+    "Kies speler",
+    "Choose player",
+    "Choisir un joueur",
+    "Spieler wählen"
+  ],
+  "join_player": [
+    "Deelnemer toevoegen",
+    "Add participant",
+    "Ajouter un participant",
+    "Teilnehmer hinzufügen"
+  ],
+  "finish_event": [
+    "Event afronden",
+    "Finish event",
+    "Terminer l’événement",
+    "Event abschließen"
+  ],
+  "delete_event_notice": [
+    "Definitief verwijderen vereist het wachtwoord van het beheerdersaccount. Uitgenodigde accounts kunnen geen events verwijderen.",
+    "Permanent deletion requires the administrator account password. Invited accounts cannot delete events.",
+    "La suppression définitive nécessite le mot de passe du compte administrateur. Les comptes invités ne peuvent pas supprimer d’événements.",
+    "Zum endgültigen Löschen wird das Passwort des Administratorkontos benötigt. Eingeladene Konten können keine Events löschen."
+  ],
+  "done": [
+    "Klaar",
+    "Done",
+    "Terminé",
+    "Fertig"
+  ],
+  "board_control_notice": [
+    "De tv blijft dit bord volgen. Kies wie begint of ga verder met de bestaande teller.",
+    "The TV keeps following this board. Choose a starter or resume the current counter.",
+    "La TV continue de suivre cette cible. Choisissez qui commence ou reprenez le compteur.",
+    "Der Fernseher folgt weiterhin diesem Board. Wähle den Starter oder setze den Zähler fort."
+  ],
+  "choose_starter": [
+    "Kies wie begint",
+    "Choose starter",
+    "Choisir qui commence",
+    "Starter wählen"
+  ],
+  "match_finished": [
+    "Partij uitgegooid",
+    "Match finished",
+    "Partie terminée",
+    "Spiel beendet"
+  ],
+  "finish_next_board": [
+    "Afronden en volgende partij",
+    "Finish and next match",
+    "Terminer et partie suivante",
+    "Abschließen und nächstes Spiel"
+  ],
+  "darts": [
+    "pijlen",
+    "darts",
+    "fléchettes",
+    "Darts"
+  ],
+  "cast_choose_board": [
+    "Kies een bord of partij in de app",
+    "Choose a board or match in the app",
+    "Choisissez une cible ou partie dans l’application",
+    "Wähle ein Board oder Spiel in der App"
+  ],
+  "cast_stale": [
+    "Verbinding onderbroken · stand kan verouderd zijn",
+    "Connection interrupted · scores may be outdated",
+    "Connexion interrompue · scores potentiellement obsolètes",
+    "Verbindung unterbrochen · Spielstand möglicherweise veraltet"
+  ],
+  "cast_separate": [
+    "Bord op tv, tellen op je iPhone",
+    "Board on TV, scoring on your iPhone",
+    "Cible sur TV, saisie sur votre iPhone",
+    "Board auf TV, zählen auf dem iPhone"
+  ],
+  "cast_keep_open": [
+    "Houd de app open tijdens het tellen. Op de tv verschijnt alleen het scorebord. Een gekoppeld teambord volgt de volgende partij automatisch.",
+    "Keep the app open while scoring. The TV shows only the scoreboard. A paired team board follows the next match automatically.",
+    "Gardez l’application ouverte pendant la saisie. La TV affiche uniquement le score. Une cible d’équipe associée suit automatiquement la partie suivante.",
+    "Lass die App beim Zählen geöffnet. Der Fernseher zeigt nur das Scoreboard. Ein verbundenes Team-Board folgt automatisch dem nächsten Spiel."
+  ],
+  "airplay_steps": [
+    "Open het Bedieningspaneel → Synchrone weergave en kies je AirPlay-tv. De app gebruikt het externe scherm voor het scorebord.",
+    "Open Control Center → Screen Mirroring and choose your AirPlay TV. The app uses the external display for the scoreboard.",
+    "Ouvrez le Centre de contrôle → Recopie de l’écran et choisissez votre TV AirPlay. L’application utilise l’écran externe pour le score.",
+    "Öffne das Kontrollzentrum → Bildschirmsynchronisierung und wähle deinen AirPlay-TV. Die App nutzt den externen Bildschirm für das Scoreboard."
+  ],
+  "cast_connected": [
+    "Verbonden",
+    "Connected",
+    "Connecté",
+    "Verbunden"
+  ],
+  "cast_select": [
+    "Kies je tv",
+    "Choose your TV",
+    "Choisissez votre TV",
+    "Fernseher wählen"
+  ],
+  "cast_registration_needed": [
+    "Chromecast wordt beschikbaar zodra de YourDartClub-ontvanger bij Google is geregistreerd en de App ID is ingesteld.",
+    "Chromecast becomes available once the YourDartClub receiver is registered with Google and its App ID is configured.",
+    "Chromecast sera disponible une fois le récepteur YourDartClub enregistré auprès de Google et son App ID configuré.",
+    "Chromecast wird verfügbar, sobald der YourDartClub-Empfänger bei Google registriert und seine App-ID eingerichtet ist."
+  ],
+  "tv_code": [
+    "Code op je tv",
+    "Code on your TV",
+    "Code sur votre TV",
+    "Code auf dem Fernseher"
+  ],
+  "pair_tv": [
+    "Tv koppelen",
+    "Pair TV",
+    "Associer la TV",
+    "TV verbinden"
+  ],
+  "tv_pair_failed": [
+    "Koppelen mislukt. Controleer je verbinding en gebruik een nieuwe code op de tv.",
+    "Pairing failed. Check your connection and use a new code on the TV.",
+    "Échec de l’association. Vérifiez la connexion et utilisez un nouveau code sur la TV.",
+    "Verbindung fehlgeschlagen. Prüfe die Verbindung und verwende einen neuen TV-Code."
+  ],
+  "cast_stop": [
+    "Casten stoppen",
+    "Stop casting",
+    "Arrêter la diffusion",
+    "Übertragung beenden"
+  ],
+  "edit_favorites": [
+    "Bewerken",
+    "Edit",
+    "Modifier",
+    "Bearbeiten"
+  ],
+  "reorder_favorites_notice": [
+    "Sleep spelers aan de handgrepen om de volgorde te wijzigen. Tik op het minteken om een favoriet te verwijderen.",
+    "Drag the handles to reorder players. Tap the minus button to remove a favorite.",
+    "Faites glisser les poignées pour réorganiser les joueurs. Touchez le bouton moins pour supprimer un favori.",
+    "Ziehe die Spieler an den Griffen in die gewünschte Reihenfolge. Tippe auf das Minuszeichen, um einen Favoriten zu entfernen."
+  ],
+  "airplay_help_button": [
+    "AirPlay verbinden: zo werkt het",
+    "Connect AirPlay: how it works",
+    "Connecter AirPlay : les étapes",
+    "AirPlay verbinden: so geht’s"
+  ],
+  "airplay_connected": [
+    "Extern scherm verbonden",
+    "External display connected",
+    "Écran externe connecté",
+    "Externes Display verbunden"
+  ],
+  "airplay_disconnected": [
+    "Nog geen extern scherm verbonden",
+    "No external display connected yet",
+    "Aucun écran externe connecté",
+    "Noch kein externes Display verbunden"
+  ],
+  "airplay_system_notice": [
+    "Je kiest de tv in het Bedieningspaneel van je iPhone of iPad.",
+    "Choose the TV in Control Center on your iPhone or iPad.",
+    "Choisissez la TV dans le Centre de contrôle de votre iPhone ou iPad.",
+    "Wähle den Fernseher im Kontrollzentrum deines iPhone oder iPad."
+  ],
+  "airplay_step_one": [
+    "1. Veeg vanaf rechtsboven omlaag om het Bedieningspaneel te openen.",
+    "1. Swipe down from the top-right corner to open Control Center.",
+    "1. Balayez vers le bas depuis le coin supérieur droit pour ouvrir le Centre de contrôle.",
+    "1. Wische von oben rechts nach unten, um das Kontrollzentrum zu öffnen."
+  ],
+  "airplay_step_two": [
+    "2. Tik op Synchrone weergave (twee schermen) en kies je AirPlay-tv.",
+    "2. Tap Screen Mirroring (two screens) and choose your AirPlay TV.",
+    "2. Touchez Recopie de l’écran (deux écrans) et choisissez votre TV AirPlay.",
+    "2. Tippe auf Bildschirmsynchronisierung (zwei Bildschirme) und wähle deinen AirPlay-Fernseher."
+  ],
+  "airplay_step_three": [
+    "3. Sluit het Bedieningspaneel en dit venster. Tel verder in de app; de tv toont het aparte scorebord.",
+    "3. Close Control Center and this panel. Keep scoring in the app; the TV shows the separate scoreboard.",
+    "3. Fermez le Centre de contrôle et cette fenêtre. Continuez à saisir les scores ; la TV affiche le tableau séparé.",
+    "3. Schließe das Kontrollzentrum und dieses Fenster. Zähle in der App weiter; der Fernseher zeigt die separate Anzeigetafel."
+  ],
+  "airplay_network_notice": [
+    "Gebruik hetzelfde wifi-netwerk en schakel AirPlay in op de tv. Verbreek de AirPlay-verbinding ook via Synchrone weergave.",
+    "Use the same Wi-Fi network and enable AirPlay on the TV. Disconnect through Screen Mirroring too.",
+    "Utilisez le même réseau Wi-Fi et activez AirPlay sur la TV. Déconnectez-vous aussi via Recopie de l’écran.",
+    "Nutze dasselbe WLAN und aktiviere AirPlay am Fernseher. Trenne die Verbindung ebenfalls über Bildschirmsynchronisierung."
+  ],
+  "board_unavailable": [
+    "Bordbediening niet beschikbaar. Vernieuw het event. Blijft dit zo, dan moet de server worden bijgewerkt.",
+    "Board controls unavailable. Refresh the event. If this continues, the server needs updating.",
+    "Commandes du tableau indisponibles. Actualisez l’événement. Si cela persiste, le serveur doit être mis à jour.",
+    "Board-Bedienung nicht verfügbar. Aktualisiere das Event. Besteht das Problem weiter, muss der Server aktualisiert werden."
+  ],
+  "board_control_conflict": [
+    "De teller is elders in gebruik of je invoerrecht is verlopen. Sluit de andere teller en kies opnieuw Tellen op dit bord.",
+    "The counter is in use elsewhere or your access expired. Close the other counter and choose Score this board again.",
+    "Le compteur est utilisé ailleurs ou votre accès a expiré. Fermez l’autre compteur et reprenez la saisie sur ce tableau.",
+    "Der Zähler wird anderswo verwendet oder dein Zugriff ist abgelaufen. Schließe den anderen Zähler und starte die Eingabe erneut."
+  ],
+  "board_connection_error": [
+    "Geen bevestiging van het platform. Je invoer blijft staan. Vernieuw de stand voordat je verder telt.",
+    "No confirmation from the platform. Your input is kept. Refresh the scores before continuing.",
+    "Aucune confirmation de la plateforme. Votre saisie est conservée. Actualisez les scores avant de continuer.",
+    "Keine Bestätigung von der Plattform. Deine Eingabe bleibt erhalten. Aktualisiere den Spielstand, bevor du weiterzählst."
+  ],
+  "board_retry": [
+    "Stand vernieuwen",
+    "Refresh scores",
+    "Actualiser les scores",
+    "Spielstand aktualisieren"
+  ],
+  "team_statistics": [
+    "Teamstatistieken",
+    "Team statistics",
+    "Statistiques de l’équipe",
+    "Teamstatistiken"
+  ],
+  "team_history": [
+    "Historie",
+    "History",
+    "Historique",
+    "Verlauf"
+  ],
+  "team_participants": [
+    "Deelnemers",
+    "Participants",
+    "Participants",
+    "Teilnehmer"
+  ],
+  "team_finished_events": [
+    "Afgeronde avonden",
+    "Completed events",
+    "Événements terminés",
+    "Abgeschlossene Events"
+  ],
+  "team_played_matches": [
+    "Gespeelde partijen",
+    "Matches played",
+    "Matchs joués",
+    "Gespielte Partien"
+  ],
+  "team_maximums": [
+    "Gegooide 180’s",
+    "180s scored",
+    "180 réalisés",
+    "Geworfene 180er"
+  ],
+  "team_high_checkout": [
+    "Hoogste checkout",
+    "Highest checkout",
+    "Meilleure sortie",
+    "Höchstes Checkout"
+  ],
+  "team_ranking": [
+    "Teamranglijst",
+    "Team rankings",
+    "Classement de l’équipe",
+    "Teamrangliste"
+  ],
+  "team_won": [
+    "Gewonnen",
+    "Won",
+    "Victoires",
+    "Gewonnen"
+  ],
+  "team_average": [
+    "Gemiddelde / 3",
+    "Average / 3",
+    "Moyenne / 3",
+    "Durchschnitt / 3"
+  ],
+  "team_no_players": [
+    "Nog geen deelnemers.",
+    "No participants yet.",
+    "Aucun participant pour le moment.",
+    "Noch keine Teilnehmer."
+  ],
+  "team_all": [
+    "Alles",
+    "All",
+    "Tous",
+    "Alle"
+  ],
+  "team_untracked": [
+    "Telt niet mee voor teamstatistieken",
+    "Excluded from team statistics",
+    "Exclu des statistiques de l’équipe",
+    "Zählt nicht für Teamstatistiken"
+  ],
+  "team_search_events": [
+    "Zoek een event",
+    "Search events",
+    "Rechercher un événement",
+    "Event suchen"
+  ],
+  "team_search_players": [
+    "Zoek een deelnemer",
+    "Search participants",
+    "Rechercher un participant",
+    "Teilnehmer suchen"
+  ],
+  "team_add_player": [
+    "Deelnemer toevoegen",
+    "Add participant",
+    "Ajouter un participant",
+    "Teilnehmer hinzufügen"
+  ],
+  "team_nickname": [
+    "Bijnaam (optioneel)",
+    "Nickname (optional)",
+    "Surnom (facultatif)",
+    "Spitzname (optional)"
+  ],
+  "team_win_rate": [
+    "Winpercentage",
+    "Win rate",
+    "Taux de victoire",
+    "Siegquote"
+  ],
+  "team_titles": [
+    "Titels",
+    "Titles",
+    "Titres",
+    "Titel"
+  ],
+  "team_averages": [
+    "Gemiddelden",
+    "Averages",
+    "Moyennes",
+    "Durchschnitte"
+  ],
+  "team_first_nine": [
+    "Eerste 9",
+    "First 9",
+    "9 premières",
+    "Erste 9"
+  ],
+  "team_scoring_average": [
+    "Scoregemiddelde >170",
+    "Scoring average >170",
+    "Moyenne de score >170",
+    "Scoring-Durchschnitt >170"
+  ],
+  "team_recorded_darts": [
+    "Geregistreerde darts",
+    "Recorded darts",
+    "Fléchettes enregistrées",
+    "Erfasste Darts"
+  ],
+  "team_per_event": [
+    "Per dartavond",
+    "Per event",
+    "Par événement",
+    "Pro Event"
+  ],
+  "team_head_to_head": [
+    "Onderlinge resultaten",
+    "Head-to-head results",
+    "Confrontations directes",
+    "Direkte Duelle"
+  ],
+  "team_no_results": [
+    "Nog geen afgeronde partijen.",
+    "No completed matches yet.",
+    "Aucun match terminé pour le moment.",
+    "Noch keine abgeschlossenen Partien."
+  ],
+  "team_stats_explanation": [
+    "Gerangschikt op gewonnen partijen, titels en gewonnen legs. Alleen afgeronde partijen tellen mee. Events zonder teamstatistieken zijn uitgesloten van de ranglijst.",
+    "Ranked by wins, titles and legs won. Only completed matches count. Events excluded from team statistics do not affect rankings.",
+    "Classement par victoires, titres et manches gagnées. Seuls les matchs terminés comptent. Les événements exclus des statistiques n’affectent pas le classement.",
+    "Sortiert nach Siegen, Titeln und gewonnenen Legs. Nur abgeschlossene Partien zählen. Events ohne Teamstatistiken beeinflussen die Rangliste nicht."
+  ],
+  "team_average_explanation": [
+    "Alleen opgeslagen worpen uit afgeronde partijen tellen mee; bust telt als nul punten. Eerste 9 gebruikt volledige reeksen van negen darts. Scoregemiddelde telt hele beurten die boven 170 beginnen, alleen bij double out. Een streep betekent dat er geen geschikte worpen zijn.",
+    "Only saved visits from completed matches count; busts score zero. First 9 uses complete nine-dart sequences. Scoring average includes full visits starting above 170, for double out only. A dash means no eligible visits.",
+    "Seules les volées enregistrées des matchs terminés comptent ; un bust vaut zéro. Les 9 premières utilisent des séries complètes de neuf fléchettes. La moyenne de score inclut les volées commençant au-dessus de 170, uniquement en double out. Un tiret indique l’absence de volées éligibles.",
+    "Nur gespeicherte Aufnahmen abgeschlossener Partien zählen; Bust zählt null Punkte. Erste 9 nutzt vollständige Serien von neun Darts. Der Scoring-Durchschnitt umfasst ganze Aufnahmen, die über 170 beginnen, nur bei Double Out. Ein Strich bedeutet keine geeigneten Aufnahmen."
+  ],
+  "team_player_save_error": [
+    "Deelnemer niet opgeslagen. Controleer je verbinding, of de naam al bestaat en of je team nog ruimte heeft. Je invoer blijft staan.",
+    "Participant not saved. Check your connection, whether the name already exists and whether your team has room. Your input is kept.",
+    "Participant non enregistré. Vérifiez la connexion, si le nom existe déjà et si votre équipe dispose encore de places. Votre saisie est conservée.",
+    "Teilnehmer nicht gespeichert. Prüfe die Verbindung, ob der Name bereits existiert und ob dein Team noch Platz hat. Deine Eingabe bleibt erhalten."
+  ],
+  "airplay_choose_tv": [
+    "Kies je AirPlay-tv",
+    "Choose your AirPlay TV",
+    "Choisissez votre TV AirPlay",
+    "AirPlay-Fernseher auswählen"
+  ],
+  "airplay_picker_hint": [
+    "Tik op het AirPlay-icoon. Kies je tv in de lijst. Daarna kun je dit venster sluiten en verder tellen.",
+    "Tap the AirPlay icon. Choose your TV from the list. Then close this panel and keep scoring.",
+    "Touchez l’icône AirPlay et choisissez votre TV. Fermez ensuite cette fenêtre pour continuer à saisir les scores.",
+    "Tippe auf das AirPlay-Symbol und wähle deinen Fernseher. Schließe dann dieses Fenster und zähle weiter."
+  ],
+  "airplay_start_stream": [
+    "AirPlay voorbereiden",
+    "Prepare AirPlay",
+    "Préparer AirPlay",
+    "AirPlay vorbereiten"
+  ],
+  "airplay_preparing": [
+    "Scorebord voorbereiden…",
+    "Preparing scoreboard…",
+    "Préparation du tableau…",
+    "Anzeigetafel wird vorbereitet…"
+  ],
+  "airplay_stop_stream": [
+    "AirPlay-uitzending stoppen",
+    "Stop AirPlay stream",
+    "Arrêter la diffusion AirPlay",
+    "AirPlay-Übertragung stoppen"
+  ],
+  "airplay_stream_failed": [
+    "De uitzending kon niet starten of is onderbroken. Gebruik hetzelfde wifi-netwerk als je tv en sta lokale netwerktoegang toe bij Instellingen > YourDartClub. Probeer daarna opnieuw.",
+    "The stream could not start or was interrupted. Use the same Wi-Fi as your TV and allow local network access in Settings > YourDartClub. Then try again.",
+    "La diffusion n’a pas pu démarrer ou a été interrompue. Utilisez le même Wi-Fi que la TV et autorisez le réseau local dans Réglages > YourDartClub. Réessayez ensuite.",
+    "Die Übertragung konnte nicht starten oder wurde unterbrochen. Nutze dasselbe WLAN wie dein Fernseher und erlaube den lokalen Netzwerkzugriff unter Einstellungen > YourDartClub. Versuche es dann erneut."
+  ],
+  "airplay_stream_background": [
+    "De uitzending is gestopt doordat de app naar de achtergrond ging of werd onderbroken. Start AirPlay opnieuw en houd de app open.",
+    "Streaming stopped because the app went into the background or was interrupted. Restart AirPlay and keep the app open.",
+    "La diffusion s’est arrêtée car l’app est passée en arrière-plan ou a été interrompue. Relancez AirPlay et gardez l’app ouverte.",
+    "Die Übertragung wurde durch Hintergrundbetrieb oder eine Unterbrechung gestoppt. Starte AirPlay erneut und lasse die App geöffnet."
+  ],
+  "airplay_live_notice": [
+    "AirPlay verstuurt video en kan enkele seconden achterlopen. Houd deze app open; bij afsluiten of vergrendelen stopt de uitzending. Voor een teambord dat zelfstandig doorloopt, gebruik je de tv-koppelcode hieronder.",
+    "AirPlay sends video and may lag by a few seconds. Keep this app open; closing or locking it stops the stream. Use the TV pairing code below for an independent team board.",
+    "AirPlay transmet une vidéo avec quelques secondes de retard possibles. Gardez l’app ouverte ; la fermeture ou le verrouillage arrête la diffusion. Utilisez le code TV ci-dessous pour un tableau d’équipe autonome.",
+    "AirPlay überträgt Video mit möglicher Verzögerung. Lasse die App geöffnet; Schließen oder Sperren stoppt die Übertragung. Für ein unabhängiges Teamboard nutze den TV-Code unten."
+  ],
+  "airplay_mirroring_fallback": [
+    "Alternatief: synchrone weergave",
+    "Alternative: screen mirroring",
+    "Alternative : recopie de l’écran",
+    "Alternative: Bildschirmsynchronisierung"
+  ],
+  "airplay_waiting_for_tv": [
+    "Nog geen tv verbonden",
+    "No TV connected yet",
+    "Aucune TV connectée",
+    "Noch kein Fernseher verbunden"
+  ],
+  "airplay_ready_notice": [
+    "Het scorebord staat klaar, maar wordt nog niet naar een tv gestuurd. Tik op Kies je AirPlay-tv om de apparatenlijst te openen.",
+    "The scoreboard is ready but is not being sent to a TV yet. Tap Choose your AirPlay TV to open the device list.",
+    "Le tableau est prêt, mais aucune TV ne le reçoit encore. Touchez Choisissez votre TV AirPlay pour ouvrir la liste.",
+    "Die Anzeigetafel ist bereit, wird aber noch nicht übertragen. Tippe auf AirPlay-Fernseher auswählen, um die Geräteliste zu öffnen."
+  ],
+  "airplay_change_tv": [
+    "Andere tv kiezen",
+    "Choose another TV",
+    "Choisir une autre TV",
+    "Anderen Fernseher wählen"
+  ],
+  "airplay_connected_notice": [
+    "AirPlay is actief. Sluit dit venster om op je iPhone verder te tellen.",
+    "AirPlay is active. Close this panel to keep scoring on your iPhone.",
+    "AirPlay est actif. Fermez cette fenêtre pour continuer à saisir les scores sur votre iPhone.",
+    "AirPlay ist aktiv. Schließe dieses Fenster, um auf deinem iPhone weiterzuzählen."
+  ],
+  "tv_current_leg": [
+    "Leg",
+    "Leg",
+    "Manche",
+    "Leg"
+  ],
+  "tv_throwing": [
+    "AAN DE WORP",
+    "TO THROW",
+    "AU LANCER",
+    "AM WURF"
+  ],
+  "tv_remaining": [
+    "RESTEREND",
+    "REMAINING",
+    "RESTANT",
+    "REST"
+  ],
+  "tv_recent_visits": [
+    "Laatste beurten · nieuwste eerst",
+    "Recent visits · newest first",
+    "Dernières volées · plus récente en premier",
+    "Letzte Aufnahmen · neueste zuerst"
+  ],
+  "participants_count": [
+    "{count} deelnemers",
+    "{count} participants",
+    "{count} participants",
+    "{count} Teilnehmer"
+  ],
+  "participants_capacity": [
+    "{count} / {limit} deelnemers",
+    "{count} / {limit} participants",
+    "{count} / {limit} participants",
+    "{count} / {limit} Teilnehmer"
+  ],
+  "participants_available": [
+    "Nog plek voor {count} deelnemers",
+    "Room for {count} more participants",
+    "Encore {count} places disponibles",
+    "Noch Platz für {count} Teilnehmer"
+  ],
+  "match_statistics": [
+    "Statistieken van deze partij",
+    "Statistics for this match",
+    "Statistiques de cette partie",
+    "Statistik dieses Spiels"
+  ],
+  "personal_event_stats_notice": [
+    "Persoonlijke statistieken uit events die meetellen voor statistieken. Losse potjes tellen niet mee.",
+    "Personal statistics from events with statistics enabled. Casual games do not count.",
+    "Statistiques personnelles des événements avec statistiques activées. Les parties libres ne comptent pas.",
+    "Persönliche Statistik aus Events mit aktivierter Statistik. Einzelne freie Spiele zählen nicht mit."
+  ],
+  "local_match_stats_notice": [
+    "Deze cijfers horen alleen bij deze partij en tellen niet mee voor persoonlijke of teamstatistieken, ook niet na uploaden.",
+    "These figures belong only to this match and do not count towards personal or team statistics, even after uploading.",
+    "Ces chiffres concernent uniquement cette partie et ne comptent pas dans les statistiques personnelles ou d’équipe, même après envoi.",
+    "Diese Werte gelten nur für dieses Spiel und zählen auch nach dem Hochladen nicht zur persönlichen oder Teamstatistik."
+  ],
+  "favorite_match_history_notice": [
+    "Opgeslagen potjes op dit apparaat met deze spelersnaam, inclusief het archief. Bekijk de statistieken per partij; deze worden niet opgeteld bij persoonlijke eventstatistieken.",
+    "Saved games on this device with this player name, including archived games. View statistics per match; these are not added to personal event statistics.",
+    "Parties enregistrées sur cet appareil avec ce nom, archives comprises. Consultez les statistiques par partie ; elles ne sont pas ajoutées aux statistiques personnelles des événements.",
+    "Gespeicherte Spiele auf diesem Gerät mit diesem Spielernamen, einschließlich Archiv. Die Statistik jedes Spiels wird nicht zur persönlichen Eventstatistik addiert."
+  ],
+  "no_saved_player_matches": [
+    "Nog geen opgeslagen potjes met deze naam.",
+    "No saved games with this name yet.",
+    "Aucune partie enregistrée avec ce nom.",
+    "Noch keine gespeicherten Spiele mit diesem Namen."
+  ],
+  "player_statistics_named": [
+    "Statistieken van {name}",
+    "Statistics for {name}",
+    "Statistiques de {name}",
+    "Statistik von {name}"
+  ],
+  "create_team": [
+    "Team aanmaken",
+    "Create team",
+    "Créer une équipe",
+    "Team erstellen"
+  ],
+  "team_name": [
+    "Teamnaam",
+    "Team name",
+    "Nom de l’équipe",
+    "Teamname"
+  ],
+  "create_team_notice": [
+    "Je wordt teambeheerder. Je team is aangemaakt zonder betaling; kies daarna bij Abonnement een maand- of jaarabonnement voor toegang.",
+    "You become the team owner. Creating a team does not charge you; choose a monthly or yearly subscription afterwards for access.",
+    "Vous devenez responsable de l’équipe. La création est sans paiement ; choisissez ensuite un abonnement mensuel ou annuel pour l’accès.",
+    "Du wirst Teamverwalter. Die Erstellung kostet nichts; wähle danach für den Zugang ein Monats- oder Jahresabo."
+  ],
+  "create_team_failed": [
+    "Aanmaken is niet bevestigd. Probeer opnieuw met dezelfde naam; je krijgt geen dubbel team.",
+    "Creation has not been confirmed. Retry with the same name; this will not create a duplicate team.",
+    "La création n’est pas confirmée. Réessayez avec le même nom ; aucune équipe en double ne sera créée.",
+    "Erstellung nicht bestätigt. Versuche es mit demselben Namen erneut; es entsteht kein doppeltes Team."
+  ],
+  "team_creating": [
+    "Team aanmaken…",
+    "Creating team…",
+    "Création…",
+    "Team wird erstellt…"
+  ],
+  "subscription": [
+    "Abonnement",
+    "Subscription",
+    "Abonnement",
+    "Abonnement"
+  ],
+  "subscription_notice": [
+    "Teamtoegang voor maximaal 15 deelnemers. Het abonnement wordt aan dit team gekoppeld en werkt ook op het platform.",
+    "Team access for up to 15 participants. The subscription is linked to this team and also works on the platform.",
+    "Accès pour 15 participants maximum. L’abonnement est lié à cette équipe et fonctionne aussi sur la plateforme.",
+    "Teamzugang für bis zu 15 Teilnehmer. Das Abo wird diesem Team zugeordnet und gilt auch auf der Plattform."
+  ],
+  "subscription_monthly": [
+    "Maandabonnement",
+    "Monthly subscription",
+    "Abonnement mensuel",
+    "Monatsabo"
+  ],
+  "subscription_yearly": [
+    "Jaarabonnement",
+    "Yearly subscription",
+    "Abonnement annuel",
+    "Jahresabo"
+  ],
+  "subscription_unavailable": [
+    "Abonnementen zijn momenteel niet beschikbaar. Probeer het later opnieuw.",
+    "Subscriptions are currently unavailable. Please try again later.",
+    "Les abonnements sont indisponibles. Réessayez plus tard.",
+    "Abonnements sind momentan nicht verfügbar. Versuche es später erneut."
+  ],
+  "subscription_existing": [
+    "Dit team heeft al een abonnement. Sluit geen tweede abonnement af.",
+    "This team already has a subscription. Do not purchase a second subscription.",
+    "Cette équipe possède déjà un abonnement. Ne souscrivez pas un second abonnement.",
+    "Dieses Team hat bereits ein Abo. Schließe kein zweites Abo ab."
+  ],
+  "subscription_restore": [
+    "Aankopen herstellen",
+    "Restore purchases",
+    "Restaurer les achats",
+    "Käufe wiederherstellen"
+  ],
+  "subscription_manage": [
+    "Apple-abonnement beheren",
+    "Manage Apple subscription",
+    "Gérer l’abonnement Apple",
+    "Apple-Abo verwalten"
+  ],
+  "subscription_reload": [
+    "Opnieuw laden",
+    "Reload",
+    "Recharger",
+    "Neu laden"
+  ],
+  "subscription_renewal_notice": [
+    "Betaling via je Apple-account. Het abonnement wordt automatisch verlengd tot je het opzegt. Beheer of beëindig je abonnement via je Apple-abonnementen.",
+    "Payment through your Apple account. Your subscription renews automatically until cancelled. Manage or cancel it through your Apple subscriptions.",
+    "Paiement via votre compte Apple. L’abonnement se renouvelle automatiquement jusqu’à résiliation. Gérez-le dans vos abonnements Apple.",
+    "Zahlung über dein Apple-Konto. Das Abo verlängert sich automatisch bis zur Kündigung. Verwalte oder kündige es in deinen Apple-Abonnements."
+  ],
+  "subscription_terms": [
+    "Gebruiksvoorwaarden",
+    "Terms of use",
+    "Conditions d’utilisation",
+    "Nutzungsbedingungen"
+  ],
+  "subscription_privacy": [
+    "Privacybeleid",
+    "Privacy policy",
+    "Confidentialité",
+    "Datenschutz"
+  ],
+  "subscription_failed": [
+    "Laden is niet gelukt. Controleer je verbinding en probeer opnieuw.",
+    "Loading failed. Check your connection and retry.",
+    "Chargement impossible. Vérifiez votre connexion et réessayez.",
+    "Laden fehlgeschlagen. Prüfe deine Verbindung und versuche es erneut."
+  ],
+  "subscription_other_team": [
+    "Dit Apple-abonnement hoort bij een ander team. Open dat team om je aankoop te herstellen.",
+    "This Apple subscription belongs to another team. Open that team to restore your purchase.",
+    "Cet abonnement Apple appartient à une autre équipe. Ouvrez cette équipe pour restaurer votre achat.",
+    "Dieses Apple-Abo gehört zu einem anderen Team. Öffne dieses Team, um den Kauf wiederherzustellen."
+  ],
+  "subscription_confirmed": [
+    "Aankoop gecontroleerd. De teamstatus is bijgewerkt.",
+    "Purchase verified. Team status has been updated.",
+    "Achat vérifié. Le statut de l’équipe a été mis à jour.",
+    "Kauf geprüft. Der Teamstatus wurde aktualisiert."
+  ],
+  "subscription_pending": [
+    "Je aankoop wacht op goedkeuring van Apple. Je wordt nog niet als betaald gemarkeerd.",
+    "Your purchase is awaiting Apple approval. Paid access has not been granted yet.",
+    "Votre achat attend l’approbation Apple. L’accès payant n’est pas encore accordé.",
+    "Dein Kauf wartet auf Apples Freigabe. Der bezahlte Zugang ist noch nicht aktiv."
+  ],
+  "subscription_verify_failed": [
+    "De aankoop kon nog niet worden bevestigd bij het platform. Probeer Aankopen herstellen; koop niet opnieuw.",
+    "The platform could not confirm the purchase yet. Try Restore purchases; do not buy again.",
+    "La plateforme n’a pas encore confirmé l’achat. Essayez Restaurer les achats ; n’achetez pas à nouveau.",
+    "Die Plattform konnte den Kauf noch nicht bestätigen. Versuche Käufe wiederherstellen; kaufe nicht erneut."
+  ],
+  "subscription_no_purchase": [
+    "Geen aankoop gevonden voor dit team en Apple-account.",
+    "No purchase found for this team and Apple account.",
+    "Aucun achat trouvé pour cette équipe et ce compte Apple.",
+    "Kein Kauf für dieses Team und Apple-Konto gefunden."
+  ],
+  "legal_information": [
+    "Voorwaarden en privacy",
+    "Terms and privacy",
+    "Conditions et confidentialité",
+    "Bedingungen und Datenschutz"
+  ],
+  "legal_cancellation": [
+    "Opzeggen en terugbetaling",
+    "Cancellation and refunds",
+    "Résiliation et remboursement",
+    "Kündigung und Erstattung"
+  ],
+  "legal_contact": [
+    "Contact en ondersteuning",
+    "Contact and support",
+    "Contact et assistance",
+    "Kontakt und Hilfe"
+  ],
+  "legal_apple_eula": [
+    "Apple-licentie voor de app",
+    "Apple app licence",
+    "Licence de l’application Apple",
+    "Apple-App-Lizenz"
+  ],
+  "subscription_binding_notice": [
+    "Eén Apple-abonnement geldt voor één team. Binnen deze abonnementsgroep kan je Apple-account niet tegelijk voor meerdere teams betalen. Kies daarom eerst het juiste team.",
+    "One Apple subscription covers one team. Within this subscription group your Apple account cannot pay for multiple teams at once. Choose the correct team first.",
+    "Un abonnement Apple couvre une équipe. Dans ce groupe d’abonnements, votre compte Apple ne peut pas payer plusieurs équipes simultanément. Choisissez d’abord la bonne équipe.",
+    "Ein Apple-Abo gilt für ein Team. Innerhalb dieser Abogruppe kann dein Apple-Konto nicht gleichzeitig mehrere Teams bezahlen. Wähle zuerst das richtige Team."
+  ],
+  "subscription_refund": [
+    "Terugbetaling bij Apple aanvragen",
+    "Request an Apple refund",
+    "Demander un remboursement Apple",
+    "Erstattung bei Apple beantragen"
+  ],
+  "deletion_title": [
+    "Account verwijderen",
+    "Delete account",
+    "Supprimer le compte",
+    "Konto löschen"
+  ],
+  "deletion_notice": [
+    "Je vraagt verwijdering van je persoonlijke account en bijbehorende persoonsgegevens aan. We handelen dit handmatig af, normaal binnen één maand, en sturen een bevestiging per e-mail zodra het klaar is. We beoordelen ook teamgegevens en wettelijke bewaarplichten; alleen wettelijk noodzakelijke gegevens blijven daarna bewaard. Het verzoek verwijdert lokale potjes op je apparaten niet.",
+    "Request deletion of your personal account and associated personal data. We process this manually, normally within one month, and email you when completed. We also review team data and legal retention duties; only legally necessary data is retained afterwards. This request does not erase local games on your devices.",
+    "Demandez la suppression de votre compte personnel et des données associées. Le traitement est manuel, normalement sous un mois, avec confirmation finale par e-mail. Nous examinons aussi les données d’équipe et obligations légales ; seules les données légalement nécessaires sont ensuite conservées. Cette demande n’efface pas les parties locales sur vos appareils.",
+    "Beantrage die Löschung deines persönlichen Kontos und zugehöriger Daten. Wir bearbeiten dies manuell, normalerweise innerhalb eines Monats, und bestätigen den Abschluss per E-Mail. Teamdaten und Aufbewahrungspflichten werden geprüft; danach bleiben nur gesetzlich erforderliche Daten erhalten. Lokale Spiele auf deinen Geräten werden dadurch nicht gelöscht."
+  ],
+  "deletion_billing_notice": [
+    "Accountverwijdering zegt een Apple-abonnement niet op. Beheer je Apple-abonnement hieronder om verdere verlenging te stoppen. Websiteabonnementen worden bij de afhandeling beoordeeld en stopgezet waar nodig. Je hoeft een Apple-opzegging niet te voltooien om dit verzoek in te dienen.",
+    "Account deletion does not cancel an Apple subscription. Manage your Apple subscription below to stop renewals. Website subscriptions are reviewed and cancelled as necessary during processing. You do not have to complete Apple cancellation before submitting this request.",
+    "La suppression du compte ne résilie pas un abonnement Apple. Gérez-le ci-dessous pour arrêter les renouvellements. Les abonnements du site sont examinés et résiliés si nécessaire lors du traitement. Vous pouvez soumettre la demande sans avoir terminé la résiliation Apple.",
+    "Kontolöschung kündigt kein Apple-Abo. Verwalte dein Apple-Abo unten, um Verlängerungen zu stoppen. Website-Abos werden bei der Bearbeitung geprüft und gegebenenfalls beendet. Du musst die Apple-Kündigung nicht abschließen, um diesen Antrag zu stellen."
+  ],
+  "deletion_confirm": [
+    "Ik wil mijn persoonlijke account en bijbehorende persoonsgegevens laten verwijderen.",
+    "I want my personal account and associated personal data deleted.",
+    "Je souhaite supprimer mon compte personnel et les données associées.",
+    "Ich möchte mein persönliches Konto und zugehörige Daten löschen lassen."
+  ],
+  "deletion_submit": [
+    "Verwijdering aanvragen",
+    "Request deletion",
+    "Demander la suppression",
+    "Löschung beantragen"
+  ],
+  "deletion_received": [
+    "Je verzoek is ontvangen. We bevestigen de verwijdering per e-mail, normaal binnen één maand.",
+    "Your request has been received. We will confirm deletion by email, normally within one month.",
+    "Votre demande est reçue. Nous confirmerons la suppression par e-mail, normalement sous un mois.",
+    "Dein Antrag ist eingegangen. Wir bestätigen die Löschung per E-Mail, normalerweise innerhalb eines Monats."
+  ],
+  "deletion_failed": [
+    "Het verzoek is niet bevestigd. Controleer je wachtwoord en verbinding en probeer opnieuw.",
+    "The request has not been confirmed. Check your password and connection and try again.",
+    "La demande n’est pas confirmée. Vérifiez votre mot de passe et la connexion, puis réessayez.",
+    "Der Antrag wurde nicht bestätigt. Prüfe Passwort und Verbindung und versuche es erneut."
+  ],
+  "register_account": [
+    "Account aanmaken",
+    "Create account",
+    "Créer un compte",
+    "Konto erstellen"
+  ],
+  "register_intro": [
+    "Maak je beheerdersaccount en team aan. Daarna kies je een abonnement. Er wordt nu nog niets afgeschreven.",
+    "Create your administrator account and team, then choose a subscription. You will not be charged now.",
+    "Créez votre compte administrateur et votre équipe, puis choisissez un abonnement. Aucun paiement maintenant.",
+    "Erstelle dein Verwaltungskonto und Team. Danach wählst du ein Abo. Jetzt wird noch nichts berechnet."
+  ],
+  "register_name": [
+    "Jouw naam",
+    "Your name",
+    "Votre nom",
+    "Dein Name"
+  ],
+  "register_email": [
+    "E-mailadres",
+    "Email address",
+    "Adresse e-mail",
+    "E-Mail-Adresse"
+  ],
+  "register_password_again": [
+    "Herhaal wachtwoord",
+    "Repeat password",
+    "Répéter le mot de passe",
+    "Passwort wiederholen"
+  ],
+  "register_password_hint": [
+    "Gebruik minimaal 10 tekens.",
+    "Use at least 10 characters.",
+    "Utilisez au moins 10 caractères.",
+    "Verwende mindestens 10 Zeichen."
+  ],
+  "register_accept": [
+    "Ik ga akkoord met de voorwaarden en heb de privacyverklaring gelezen.",
+    "I accept the terms and have read the privacy policy.",
+    "J’accepte les conditions et j’ai lu la politique de confidentialité.",
+    "Ich akzeptiere die Bedingungen und habe die Datenschutzerklärung gelesen."
+  ],
+  "register_continue": [
+    "Aanmaken en abonnement kiezen",
+    "Create and choose subscription",
+    "Créer et choisir un abonnement",
+    "Erstellen und Abo wählen"
+  ],
+  "register_invalid": [
+    "Controleer je gegevens. Bestaat dit e-mailadres al? Log dan in met je bestaande account.",
+    "Check your details. If this email already exists, sign in with your existing account.",
+    "Vérifiez vos données. Si cette adresse existe déjà, connectez-vous à votre compte.",
+    "Prüfe deine Angaben. Ist die E-Mail bereits registriert, melde dich mit deinem bestehenden Konto an."
+  ],
+  "register_created_login": [
+    "Je account is aangemaakt. Inloggen lukte nog niet; probeer opnieuw in te loggen.",
+    "Your account was created. Sign-in failed; please try signing in again.",
+    "Votre compte est créé. La connexion a échoué ; réessayez de vous connecter.",
+    "Dein Konto wurde erstellt. Die Anmeldung ist fehlgeschlagen; versuche es erneut."
+  ],
+  "register_failed": [
+    "De bevestiging is niet ontvangen. Probeer in te loggen als het account al is aangemaakt, of probeer het later opnieuw.",
+    "Confirmation was not received. Try signing in if the account was created, or try again later.",
+    "Confirmation non reçue. Essayez de vous connecter si le compte a été créé, ou réessayez plus tard.",
+    "Keine Bestätigung erhalten. Melde dich an, falls das Konto erstellt wurde, oder versuche es später erneut."
+  ],
+  "team_options": [
+    "Teamopties",
+    "Team options",
+    "Options de l’équipe",
+    "Teamoptionen"
+  ],
+  "create_extra_team": [
+    "Extra team aanmaken",
+    "Create another team",
+    "Créer une autre équipe",
+    "Weiteres Team erstellen"
+  ],
+  "extra_team_notice": [
+    "Alleen nodig voor een aparte groep spelers. Elk team heeft een eigen abonnement nodig.",
+    "Only needed for a separate group of players. Each team needs its own subscription.",
+    "Uniquement pour un autre groupe de joueurs. Chaque équipe nécessite son propre abonnement.",
+    "Nur für eine separate Spielergruppe nötig. Jedes Team benötigt ein eigenes Abo."
+  ],
+  "select_starter": [
+    "Deze speler laten beginnen",
+    "Let this player start",
+    "Faire commencer ce joueur",
+    "Diesen Spieler beginnen lassen"
+  ],
+  "tap_to_start": [
+    "Tik op de score om te beginnen",
+    "Tap the score to start",
+    "Touchez le score pour commencer",
+    "Zum Beginnen auf die Punktzahl tippen"
+  ],
+  "event_advice": [
+    "Iedereen lekker laten spelen?",
+    "Want everyone to keep playing?",
+    "Envie de faire jouer tout le monde ?",
+    "Alle sollen mitspielen?"
+  ],
+  "event_league_advice": [
+    "Met {players} spelers speelt iedereen in de competitie {matches} partijen. Niemand valt tussendoor af.",
+    "With {players} players, everyone plays {matches} league matches. Nobody is eliminated during the league.",
+    "Avec {players} joueurs, chacun joue {matches} matchs de championnat. Personne ne tombe pendant cette phase.",
+    "Mit {players} Spielern spielt jeder {matches} Ligaspiele. Während der Liga scheidet niemand aus."
+  ],
+  "event_odd_advice": [
+    "Bij een oneven aantal is elke ronde iemand vrij. De vrije ronde wisselt tussen spelers.",
+    "With an odd number, one player sits out each round. The rest round rotates between players.",
+    "Avec un nombre impair, un joueur se repose à chaque tour. Le repos passe de joueur en joueur.",
+    "Bei ungerader Spielerzahl pausiert jede Runde jemand. Die Pause wechselt zwischen den Spielern."
+  ],
+  "event_knockout_advice": [
+    "Bij knock-out kan iemand na één partij klaar zijn.",
+    "In knockout, a player may be out after one match.",
+    "En élimination directe, un joueur peut être éliminé après un seul match.",
+    "Im K.-o.-Modus kann ein Spieler nach einem Spiel ausscheiden."
+  ],
+  "event_byes": [
+    "Er zijn {count} vrijstellingen in de eerste ronde.",
+    "There are {count} byes in the first round.",
+    "Il y a {count} exemptions au premier tour.",
+    "In der ersten Runde gibt es {count} Freilose."
+  ],
+  "third_place_option": [
+    "Ook spelen om plek 3",
+    "Also play for third place",
+    "Jouer aussi pour la troisième place",
+    "Auch um Platz 3 spielen"
+  ],
+  "third_place_notice": [
+    "De verliezers van de halve finales spelen nog één partij. Spelers buiten de top vier zijn na de competitie klaar.",
+    "The semifinal losers play one more match. Players outside the top four finish after the league.",
+    "Les perdants des demi-finales jouent un dernier match. Les joueurs hors du top quatre terminent après le championnat.",
+    "Die Verlierer der Halbfinals spielen noch ein Spiel. Spieler außerhalb der besten vier sind nach der Liga fertig."
+  ],
+  "third_place_title": [
+    "Wedstrijd om plek 3",
+    "Third-place match",
+    "Match pour la troisième place",
+    "Spiel um Platz 3"
+  ],
+  "third_place_pending": [
+    "Verliezers van de halve finales",
+    "Semifinal losers",
+    "Perdants des demi-finales",
+    "Verlierer der Halbfinals"
+  ],
+  "event_total": [
+    "Totaal: {count} partijen.",
+    "Total: {count} matches.",
+    "Total : {count} matchs.",
+    "Insgesamt: {count} Spiele."
+  ],
+  "event_parallel": [
+    "Maximaal {count} partijen tegelijk; geen tijdsinschatting.",
+    "Up to {count} simultaneous matches; not a time estimate.",
+    "Au maximum {count} matchs simultanés ; sans estimation de durée.",
+    "Maximal {count} Spiele gleichzeitig; keine Zeitschätzung."
+  ],
+  "event_odd_boards": [
+    "Extra borden nemen de oneven rustbeurt niet weg.",
+    "Extra boards do not remove the odd-player bye.",
+    "Des cibles supplémentaires ne suppriment pas le repos en nombre impair.",
+    "Weitere Boards verhindern die Pause bei ungerader Spielerzahl nicht."
+  ],
+  "event_playoffs_advice": [
+    "Daarna speelt de top vier halve finales (1–4 en 2–3) en een finale. De overige spelers zijn na de competitie klaar.",
+    "Then the top four play semifinals (1–4 and 2–3) and a final. Other players finish after the league.",
+    "Puis le top quatre joue les demi-finales (1–4 et 2–3) et la finale. Les autres terminent après le championnat.",
+    "Danach spielen die besten vier Halbfinale (1–4 und 2–3) und Finale. Für die anderen endet das Turnier nach der Liga."
+  ],
+  "event_playoffs_minimum": [
+    "Voor competitie met finales zijn minstens vier spelers nodig.",
+    "League with finals requires at least four players.",
+    "Au moins quatre joueurs sont requis pour les finales.",
+    "Für Liga mit Finalrunde werden mindestens vier Spieler benötigt."
+  ],
+  "subscription_store_intent": [
+    "Log in en kies bij je team Abonnement om je App Store-aankoop voort te zetten. Maak eerst een team aan als je er nog geen hebt.",
+    "Sign in and open Subscription for your team to continue your App Store purchase. Create a team first if you do not have one.",
+    "Connectez-vous et ouvrez Abonnement pour votre équipe afin de poursuivre votre achat App Store. Créez une équipe si vous n’en avez pas.",
+    "Melde dich an und öffne Abonnement für dein Team, um deinen App Store-Kauf fortzusetzen. Erstelle zuerst ein Team, falls du noch keines hast."
+  ],
+  "subscription_store_selected": [
+    "Gekozen in de App Store",
+    "Selected in the App Store",
+    "Sélectionné dans l’App Store",
+    "Im App Store ausgewählt"
+  ],
+  "subscription_heading": [
+    "Het hele team doet mee.",
+    "The whole team is in.",
+    "Toute l’équipe participe.",
+    "Das ganze Team ist dabei."
+  ],
+  "subscription_events": [
+    "Onbeperkt dartavonden en toernooien",
+    "Unlimited dart nights and tournaments",
+    "Soirées et tournois illimités",
+    "Unbegrenzte Dartabende und Turniere"
+  ],
+  "subscription_live": [
+    "Live scores en tv-weergave",
+    "Live scores and TV display",
+    "Scores en direct et affichage TV",
+    "Live-Spielstände und TV-Anzeige"
+  ],
+  "subscription_stats": [
+    "Statistieken en historie voor je team",
+    "Team statistics and history",
+    "Statistiques et historique de l’équipe",
+    "Teamstatistiken und Verlauf"
+  ],
+  "subscription_save_year": [
+    "Bespaar %@ per jaar",
+    "Save %@ per year",
+    "Économisez %@ par an",
+    "Spare %@ pro Jahr"
+  ],
+  "subscription_month_equivalent": [
+    "Omgerekend %@ per maand · jaarlijks betaald",
+    "Equivalent to %@ per month · billed yearly",
+    "Soit %@ par mois · facturé annuellement",
+    "Entspricht %@ pro Monat · jährlich bezahlt"
+  ],
+  "subscription_team_limit": [
+    "Per team · tot 15 spelers",
+    "Per team · up to 15 players",
+    "Par équipe · jusqu’à 15 joueurs",
+    "Pro Team · bis zu 15 Spieler"
+  ],
+  "subscription_choose_year": [
+    "Kies jaarlijks",
+    "Choose yearly",
+    "Choisir l’offre annuelle",
+    "Jährlich wählen"
+  ],
+  "subscription_choose_month": [
+    "Kies maandelijks",
+    "Choose monthly",
+    "Choisir l’offre mensuelle",
+    "Monatlich wählen"
+  ],
+  "subscription_per_year": [
+    "/ jaar",
+    "/ year",
+    "/ an",
+    "/ Jahr"
+  ],
+  "subscription_per_month": [
+    "/ maand",
+    "/ month",
+    "/ mois",
+    "/ Monat"
+  ],
+  "subscription_currency_notice": [
+    "Apple geeft momenteel prijzen in een andere valuta dan euro terug. Controleer je App Store-regio; de prijs in Apples aankoopvenster is bepalend.",
+    "Apple is currently returning prices in a currency other than euros. Check your App Store region; the price in Apple’s purchase sheet applies.",
+    "Apple renvoie actuellement des prix dans une autre devise que l’euro. Vérifiez la région de votre App Store ; le prix affiché dans la fenêtre d’achat Apple fait foi.",
+    "Apple liefert derzeit Preise in einer anderen Währung als Euro. Prüfe deine App-Store-Region; maßgeblich ist der Preis im Apple-Kauffenster."
+  ],
+  "subscription_european_reference": [
+    "Europese tarieven voor deze test: €9,95 per maand of €89,99 per jaar. Apple bevestigt de prijs voor jouw App Store-regio in het aankoopvenster.",
+    "European reference prices for this test: €9.95 per month or €89.99 per year. Apple confirms the price for your App Store region in the purchase sheet.",
+    "Tarifs européens pour ce test : 9,95 € par mois ou 89,99 € par an. Apple confirme le prix de votre région App Store dans la fenêtre d’achat.",
+    "Europäische Referenzpreise für diesen Test: 9,95 € monatlich oder 89,99 € jährlich. Apple bestätigt den Preis deiner App-Store-Region im Kauffenster."
+  ],
+  "autodarts_remote": [
+    "Autodarts bedienen",
+    "Control Autodarts",
+    "Commander Autodarts",
+    "Autodarts bedienen"
+  ],
+  "team_agenda": [
+    "Agenda",
+    "Calendar",
+    "Agenda",
+    "Kalender"
+  ],
+  "agenda_copy_link": [
+    "Kopieer de abonnementslink in de agenda.",
+    "Copy the subscription link from the calendar.",
+    "Copiez le lien d’abonnement dans l’agenda.",
+    "Kopiere den Abonnement-Link im Kalender."
+  ],
+  "agenda_saved_notice": [
+    "Opgeslagen agenda · mogelijk verouderd",
+    "Saved agenda · may be out of date",
+    "Agenda enregistré · peut être obsolète",
+    "Gespeicherter Kalender · möglicherweise veraltet"
+  ],
+  "agenda_updated_at": [
+    "Laatst bijgewerkt: :date",
+    "Last updated: :date",
+    "Dernière mise à jour : :date",
+    "Zuletzt aktualisiert: :date"
+  ],
+  "agenda_read_only": [
+    "Zodra je weer internet hebt, kun je vernieuwen. Aanwezigheid doorgeven en wijzigingen opslaan kan alleen online.",
+    "Refresh when you have internet again. Attendance and changes require an internet connection.",
+    "Actualisez dès que vous retrouvez Internet. Les présences et les modifications nécessitent une connexion.",
+    "Aktualisiere, sobald du wieder Internet hast. Zusagen und Änderungen erfordern eine Internetverbindung."
+  ],
+  "agenda_no_saved": [
+    "Er is nog geen agenda op dit apparaat opgeslagen. Open de agenda eerst met internet om je wedstrijden en trainingen offline te kunnen bekijken.",
+    "No agenda is saved on this device yet. Open the agenda with internet first to view your matches and training sessions offline.",
+    "Aucun agenda enregistré sur cet appareil. Ouvrez-le d’abord avec Internet pour consulter vos matchs et entraînements hors ligne.",
+    "Auf diesem Gerät ist noch kein Kalender gespeichert. Öffne ihn zuerst mit Internet, um Spiele und Trainingseinheiten offline anzusehen."
+  ],
+  "agenda_empty": [
+    "Er staan geen komende wedstrijden of trainingen in de opgeslagen agenda.",
+    "There are no upcoming matches or training sessions in the saved agenda.",
+    "Aucun match ou entraînement à venir dans l’agenda enregistré.",
+    "Im gespeicherten Kalender stehen keine bevorstehenden Spiele oder Trainingseinheiten."
+  ],
+  "agenda_cancelled": [
+    "Geannuleerd",
+    "Cancelled",
+    "Annulé",
+    "Abgesagt"
+  ],
+  "agenda_date_unknown": [
+    "Datum nog niet bekend",
+    "Date not yet known",
+    "Date à confirmer",
+    "Datum noch unbekannt"
+  ],
+  "competition_select_team": [
+    "Kies jullie team",
+    "Choose your team",
+    "Choisir votre équipe",
+    "Euer Team auswählen"
+  ],
+  "competition_not_linked": [
+    "Er is geen DBMN-team gekoppeld.",
+    "No DBMN team is linked.",
+    "Aucune équipe DBMN n’est associée.",
+    "Es ist kein DBMN-Team verknüpft."
+  ],
+  "competition_schedule_empty": [
+    "Er staan geen wedstrijden zonder uitslag in de agenda.",
+    "There are no matches without a published result.",
+    "Aucun match sans résultat publié n’est prévu.",
+    "Es gibt keine Spiele ohne veröffentlichtes Ergebnis."
+  ],
+  "competition_title": [
+    "DBMN-competitie",
+    "DBMN competition",
+    "Compétition DBMN",
+    "DBMN-Liga"
+  ],
+  "competition_home": [
+    "Thuis",
+    "Home",
+    "Domicile",
+    "Heim"
+  ],
+  "competition_team": [
+    "DBMN-team",
+    "DBMN team",
+    "Équipe DBMN",
+    "DBMN-Team"
+  ],
+  "competition_load_failed": [
+    "De competitiegegevens konden niet worden geladen. Eerder getoonde gegevens blijven staan.",
+    "The competition data could not be loaded. Previously shown data remains available.",
+    "Les données de compétition n’ont pas pu être chargées. Les données déjà affichées restent disponibles.",
+    "Die Ligadaten konnten nicht geladen werden. Bereits angezeigte Daten bleiben verfügbar."
+  ],
+  "competition_official_sources": [
+    "Officiële bronnen",
+    "Official sources",
+    "Sources officielles",
+    "Offizielle Quellen"
+  ],
+  "competition_season": [
+    "Seizoen",
+    "Season",
+    "Saison",
+    "Saison"
+  ],
+  "competition_points_short": [
+    "Punten",
+    "Points",
+    "Points",
+    "Punkte"
+  ],
+  "competition_unavailable": [
+    "DBMN is tijdelijk niet bereikbaar. Bekijk de officiële bron of probeer het straks opnieuw.",
+    "DBMN is temporarily unavailable. Check the official source or try again later.",
+    "DBMN est temporairement indisponible. Consultez la source officielle ou réessayez plus tard.",
+    "DBMN ist vorübergehend nicht erreichbar. Prüfe die offizielle Quelle oder versuche es später erneut."
+  ],
+  "competition_rate_limit": [
+    "Wacht even voordat je de competitie opnieuw vernieuwt.",
+    "Please wait before refreshing the competition again.",
+    "Veuillez patienter avant d’actualiser à nouveau la compétition.",
+    "Bitte warte, bevor du die Liga erneut aktualisierst."
+  ],
+  "competition_source_error": [
+    "DBMN is tijdelijk niet bereikbaar. Eerder opgehaalde gegevens blijven zichtbaar.",
+    "DBMN is temporarily unavailable. Previously fetched data remains visible.",
+    "DBMN est temporairement indisponible. Les données déjà récupérées restent visibles.",
+    "DBMN ist vorübergehend nicht erreichbar. Bereits abgerufene Daten bleiben sichtbar."
+  ],
+  "competition_schedule": [
+    "Wedstrijdagenda",
+    "Match schedule",
+    "Calendrier des matchs",
+    "Spielplan"
+  ],
+  "competition_waiting_result": [
+    "Wacht op uitslag",
+    "Awaiting result",
+    "Résultat en attente",
+    "Ergebnis ausstehend"
+  ],
+  "competition_last_fetch": [
+    "Laatst succesvol opgehaald",
+    "Last successful fetch",
+    "Dernière récupération réussie",
+    "Zuletzt erfolgreich abgerufen"
+  ],
+  "competition_standings": [
+    "Volledige divisiestand",
+    "Full division standings",
+    "Classement complet de la division",
+    "Vollständige Divisionstabelle"
+  ],
+  "competition_played_short": [
+    "Gesp.",
+    "Pld",
+    "J.",
+    "Sp."
+  ],
+  "competition_link": [
+    "Competitie koppelen",
+    "Link competition",
+    "Associer la compétition",
+    "Liga verknüpfen"
+  ],
+  "competition_penalty_short": [
+    "Straf",
+    "Penalty",
+    "Pénalité",
+    "Strafe"
+  ],
+  "competition_options_loading": [
+    "Teams laden…",
+    "Loading teams…",
+    "Chargement des équipes…",
+    "Teams werden geladen…"
+  ],
+  "competition_loading": [
+    "Competitie laden…",
+    "Loading competition…",
+    "Chargement de la compétition…",
+    "Liga wird geladen…"
+  ],
+  "competition_unlink_notice": [
+    "De stand en agenda verdwijnen uit YourDartClub. Gegevens bij DBMN worden niet gewijzigd.",
+    "The standings and fixtures will disappear from YourDartClub. No data at DBMN will be changed.",
+    "Le classement et le calendrier disparaîtront de YourDartClub. Aucune donnée DBMN ne sera modifiée.",
+    "Tabelle und Spielplan verschwinden aus YourDartClub. Bei DBMN werden keine Daten geändert."
+  ],
+  "competition_division": [
+    "Divisie",
+    "Division",
+    "Division",
+    "Division"
+  ],
+  "competition_select_division": [
+    "Kies een divisie",
+    "Choose a division",
+    "Choisir une division",
+    "Division auswählen"
+  ],
+  "competition_away": [
+    "Uit",
+    "Away",
+    "Extérieur",
+    "Auswärts"
+  ],
+  "competition_read_only": [
+    "Alleen de teambeheerder kan de koppeling wijzigen, en alleen wanneer de app op Nederlands staat.",
+    "Only the team administrator can change the link, and only while the app is set to Dutch.",
+    "Seul l’administrateur de l’équipe peut modifier l’association, et uniquement lorsque l’application est en néerlandais.",
+    "Nur der Teamadministrator kann die Verknüpfung ändern, und nur wenn die App auf Niederländisch eingestellt ist."
+  ],
+  "competition_unlink": [
+    "Koppeling verwijderen",
+    "Remove link",
+    "Supprimer l’association",
+    "Verknüpfung entfernen"
+  ],
+  "competition_won_short": [
+    "Gew.",
+    "Won",
+    "G.",
+    "Gew."
+  ],
+  "competition_own_team": [
+    "Jullie team",
+    "Your team",
+    "Votre équipe",
+    "Euer Team"
+  ],
+  "competition_official_team": [
+    "Bekijk jullie team bij DBMN",
+    "View your team at DBMN",
+    "Voir votre équipe sur DBMN",
+    "Euer Team bei DBMN ansehen"
+  ],
+  "competition_lost_short": [
+    "Verl.",
+    "Lost",
+    "P.",
+    "Verl."
+  ],
+  "competition_saving": [
+    "Opslaan…",
+    "Saving…",
+    "Enregistrement…",
+    "Wird gespeichert…"
+  ],
+  "competition_change": [
+    "Competitiekoppeling wijzigen",
+    "Change competition link",
+    "Modifier l’association",
+    "Ligaverknüpfung ändern"
+  ],
+  "competition_link_notice": [
+    "Kies seizoen, divisie en team. De koppeling is optioneel en verandert geen eigen dartavonden of spelersstatistieken.",
+    "Choose a season, division and team. Linking is optional and never changes your own darts events or player statistics.",
+    "Choisissez la saison, la division et l’équipe. L’association est facultative et ne modifie jamais vos soirées ni les statistiques des joueurs.",
+    "Wählt Saison, Division und Team. Die Verknüpfung ist optional und ändert keine eigenen Dartabende oder Spielerstatistiken."
+  ],
+  "competition_average_short": [
+    "Gem.",
+    "Avg.",
+    "Moy.",
+    "Ø"
+  ],
+  "competition_source_notice": [
+    "DBMN is de officiële bron. YourDartClub leest de openbare competitiegegevens alleen ter informatie.",
+    "DBMN is the official source. YourDartClub reads the public competition data for information only.",
+    "DBMN est la source officielle. YourDartClub lit uniquement les données publiques de compétition à titre informatif.",
+    "DBMN ist die offizielle Quelle. YourDartClub liest die öffentlichen Ligadaten nur zur Information."
+  ],
+  "competition_refresh": [
+    "Vernieuwen",
+    "Refresh",
+    "Actualiser",
+    "Aktualisieren"
+  ],
+  "competition_stale": [
+    "DBMN is tijdelijk niet bereikbaar. Je ziet de laatst succesvol opgehaalde gegevens.",
+    "DBMN is temporarily unavailable. You are seeing the last successfully fetched data.",
+    "DBMN est temporairement indisponible. Les dernières données récupérées avec succès restent affichées.",
+    "DBMN ist vorübergehend nicht erreichbar. Die zuletzt erfolgreich abgerufenen Daten bleiben sichtbar."
+  ],
+  "competition_link_title": [
+    "Koppel jullie DBMN-team",
+    "Link your DBMN team",
+    "Associer votre équipe DBMN",
+    "Euer DBMN-Team verknüpfen"
+  ],
+  "competition_freshness_notice": [
+    "De backend controleert DBMN iedere vijf minuten. Dit ophaaltijdstip is geen wijzigingsdatum; actualiteit hangt af van publicatie bij DBMN.",
+    "The backend checks DBMN every five minutes. This fetch time is not a modification date; freshness depends on publication by DBMN.",
+    "Le serveur vérifie DBMN toutes les cinq minutes. Cette heure de récupération n’est pas une date de modification ; l’actualité dépend de la publication par DBMN.",
+    "Das Backend prüft DBMN alle fünf Minuten. Dieser Abrufzeitpunkt ist kein Änderungsdatum; die Aktualität hängt von der Veröffentlichung durch DBMN ab."
+  ],
+  "competition_invalid_selection": [
+    "Het gekozen DBMN-team kon niet worden bevestigd. Controleer seizoen, divisie en team.",
+    "The selected DBMN team could not be confirmed. Check the season, division and team.",
+    "L’équipe DBMN sélectionnée n’a pas pu être confirmée. Vérifiez la saison, la division et l’équipe.",
+    "Das ausgewählte DBMN-Team konnte nicht bestätigt werden. Prüfe Saison, Division und Team."
+  ],
+  "competition_results": [
+    "Gespeelde uitslagen",
+    "Played results",
+    "Résultats joués",
+    "Gespielte Ergebnisse"
+  ],
+  "competition_official_standings": [
+    "Bekijk de officiële stand",
+    "View the official standings",
+    "Voir le classement officiel",
+    "Offizielle Tabelle ansehen"
+  ]
+}
